@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-size-multiplier: 1;
+    --contrast-multiplier: 1;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+
+  /* Accessibility styles */
+  .text-base {
+    font-size: calc(1rem * var(--font-size-multiplier));
+  }
+
+  .text-lg {
+    font-size: calc(1.125rem * var(--font-size-multiplier));
+  }
+
+  .text-xl {
+    font-size: calc(1.25rem * var(--font-size-multiplier));
+  }
+
+  .text-2xl {
+    font-size: calc(1.5rem * var(--font-size-multiplier));
+  }
+
+  .text-3xl {
+    font-size: calc(1.875rem * var(--font-size-multiplier));
+  }
+
+  .text-4xl {
+    font-size: calc(2.25rem * var(--font-size-multiplier));
+  }
+
+  [data-accessibility-mode="true"] {
+    @apply focus:outline-4 focus:outline-primary;
+  }
+
+  [data-accessibility-mode="true"] .text-muted-foreground {
+    opacity: calc(0.8 * var(--contrast-multiplier));
+  }
+
+  [data-accessibility-mode="true"] button,
+  [data-accessibility-mode="true"] a {
+    @apply focus:ring-4 focus:ring-primary focus:outline-none;
+  }
+  
+  /* Verbeterde leesbaarheid voor oudere gebruikers */
+  [data-accessibility-mode="true"] p,
+  [data-accessibility-mode="true"] span,
+  [data-accessibility-mode="true"] div {
+    line-height: 1.7;
+    letter-spacing: 0.01em;
+  }
+  
+  /* Extra contrast voor formuliervelden */
+  [data-accessibility-mode="true"] input,
+  [data-accessibility-mode="true"] select,
+  [data-accessibility-mode="true"] textarea {
+    @apply border-2 border-input focus:border-primary;
+  }
+  
+  /* Aangepaste stijlen per niveau */
+  [data-accessibility-level="2"] button,
+  [data-accessibility-level="2"] a.button {
+    @apply py-3 px-4;
+  }
+  
+  [data-accessibility-level="3"] button,
+  [data-accessibility-level="3"] a.button {
+    @apply py-4 px-6;
+  }
+  
+  /* Extra ruimte tussen elementen */
+  [data-accessibility-level="2"] .space-y-4 {
+    @apply space-y-5;
+  }
+  
+  [data-accessibility-level="3"] .space-y-4 {
+    @apply space-y-6;
+  }
+}
