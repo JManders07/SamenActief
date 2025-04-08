@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ThemeProvider } from "@/hooks/use-theme";
 import NotFound from "@/pages/not-found";
+import Index from "@/pages/index";
 import Home from "@/pages/home";
 import Center from "@/pages/center";
 import Activity from "@/pages/activity";
@@ -18,7 +19,8 @@ import Navigation from "@/components/navigation";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      <Route path="/" component={Index} />
+      <Route path="/home" component={Home} />
       <Route path="/centers/:id" component={Center} />
       <Route path="/activities/:id" component={Activity} />
       <Route path="/profile" component={Profile} />

@@ -1,0 +1,33 @@
+// vite.config.ts
+import { defineConfig } from "file:///C:/Users/wessi/OneDrive%20-%20Office%20365%20Fontys/Documenten/GitHub/SamenActief/node_modules/vite/dist/node/index.js";
+import react from "file:///C:/Users/wessi/OneDrive%20-%20Office%20365%20Fontys/Documenten/GitHub/SamenActief/node_modules/@vitejs/plugin-react/dist/index.mjs";
+import themePlugin from "file:///C:/Users/wessi/OneDrive%20-%20Office%20365%20Fontys/Documenten/GitHub/SamenActief/node_modules/@replit/vite-plugin-shadcn-theme-json/dist/index.mjs";
+import path, { dirname } from "path";
+import runtimeErrorOverlay from "file:///C:/Users/wessi/OneDrive%20-%20Office%20365%20Fontys/Documenten/GitHub/SamenActief/node_modules/@replit/vite-plugin-runtime-error-modal/dist/index.mjs";
+import { fileURLToPath } from "url";
+var __vite_injected_original_import_meta_url = "file:///C:/Users/wessi/OneDrive%20-%20Office%20365%20Fontys/Documenten/GitHub/SamenActief/vite.config.ts";
+var __filename = fileURLToPath(__vite_injected_original_import_meta_url);
+var __dirname = dirname(__filename);
+var vite_config_default = defineConfig({
+  plugins: [
+    react(),
+    runtimeErrorOverlay(),
+    themePlugin()
+    // eventueel cartographer plugin handmatig toevoegen hier indien nodig
+  ],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "client", "src"),
+      "@shared": path.resolve(__dirname, "shared")
+    }
+  },
+  root: path.resolve(__dirname, "client"),
+  build: {
+    outDir: path.resolve(__dirname, "../dist/client"),
+    emptyOutDir: true
+  }
+});
+export {
+  vite_config_default as default
+};
+//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsidml0ZS5jb25maWcudHMiXSwKICAic291cmNlc0NvbnRlbnQiOiBbImNvbnN0IF9fdml0ZV9pbmplY3RlZF9vcmlnaW5hbF9kaXJuYW1lID0gXCJDOlxcXFxVc2Vyc1xcXFx3ZXNzaVxcXFxPbmVEcml2ZSAtIE9mZmljZSAzNjUgRm9udHlzXFxcXERvY3VtZW50ZW5cXFxcR2l0SHViXFxcXFNhbWVuQWN0aWVmXCI7Y29uc3QgX192aXRlX2luamVjdGVkX29yaWdpbmFsX2ZpbGVuYW1lID0gXCJDOlxcXFxVc2Vyc1xcXFx3ZXNzaVxcXFxPbmVEcml2ZSAtIE9mZmljZSAzNjUgRm9udHlzXFxcXERvY3VtZW50ZW5cXFxcR2l0SHViXFxcXFNhbWVuQWN0aWVmXFxcXHZpdGUuY29uZmlnLnRzXCI7Y29uc3QgX192aXRlX2luamVjdGVkX29yaWdpbmFsX2ltcG9ydF9tZXRhX3VybCA9IFwiZmlsZTovLy9DOi9Vc2Vycy93ZXNzaS9PbmVEcml2ZSUyMC0lMjBPZmZpY2UlMjAzNjUlMjBGb250eXMvRG9jdW1lbnRlbi9HaXRIdWIvU2FtZW5BY3RpZWYvdml0ZS5jb25maWcudHNcIjtpbXBvcnQgeyBkZWZpbmVDb25maWcgfSBmcm9tIFwidml0ZVwiO1xyXG5pbXBvcnQgcmVhY3QgZnJvbSBcIkB2aXRlanMvcGx1Z2luLXJlYWN0XCI7XHJcbmltcG9ydCB0aGVtZVBsdWdpbiBmcm9tIFwiQHJlcGxpdC92aXRlLXBsdWdpbi1zaGFkY24tdGhlbWUtanNvblwiO1xyXG5pbXBvcnQgcGF0aCwgeyBkaXJuYW1lIH0gZnJvbSBcInBhdGhcIjtcclxuaW1wb3J0IHJ1bnRpbWVFcnJvck92ZXJsYXkgZnJvbSBcIkByZXBsaXQvdml0ZS1wbHVnaW4tcnVudGltZS1lcnJvci1tb2RhbFwiO1xyXG5pbXBvcnQgeyBmaWxlVVJMVG9QYXRoIH0gZnJvbSBcInVybFwiO1xyXG5cclxuY29uc3QgX19maWxlbmFtZSA9IGZpbGVVUkxUb1BhdGgoaW1wb3J0Lm1ldGEudXJsKTtcclxuY29uc3QgX19kaXJuYW1lID0gZGlybmFtZShfX2ZpbGVuYW1lKTtcclxuXHJcbmV4cG9ydCBkZWZhdWx0IGRlZmluZUNvbmZpZyh7XHJcbiAgcGx1Z2luczogW1xyXG4gICAgcmVhY3QoKSxcclxuICAgIHJ1bnRpbWVFcnJvck92ZXJsYXkoKSxcclxuICAgIHRoZW1lUGx1Z2luKClcclxuICAgIC8vIGV2ZW50dWVlbCBjYXJ0b2dyYXBoZXIgcGx1Z2luIGhhbmRtYXRpZyB0b2V2b2VnZW4gaGllciBpbmRpZW4gbm9kaWdcclxuICBdLFxyXG4gIHJlc29sdmU6IHtcclxuICAgIGFsaWFzOiB7XHJcbiAgICAgIFwiQFwiOiBwYXRoLnJlc29sdmUoX19kaXJuYW1lLCBcImNsaWVudFwiLCBcInNyY1wiKSxcclxuICAgICAgXCJAc2hhcmVkXCI6IHBhdGgucmVzb2x2ZShfX2Rpcm5hbWUsIFwic2hhcmVkXCIpXHJcbiAgICB9XHJcbiAgfSxcclxuICByb290OiBwYXRoLnJlc29sdmUoX19kaXJuYW1lLCBcImNsaWVudFwiKSxcclxuICBidWlsZDoge1xyXG4gICAgb3V0RGlyOiBwYXRoLnJlc29sdmUoX19kaXJuYW1lLCBcIi4uL2Rpc3QvY2xpZW50XCIpLFxyXG4gICAgZW1wdHlPdXREaXI6IHRydWVcclxuICB9XHJcbn0pOyJdLAogICJtYXBwaW5ncyI6ICI7QUFBbWEsU0FBUyxvQkFBb0I7QUFDaGMsT0FBTyxXQUFXO0FBQ2xCLE9BQU8saUJBQWlCO0FBQ3hCLE9BQU8sUUFBUSxlQUFlO0FBQzlCLE9BQU8seUJBQXlCO0FBQ2hDLFNBQVMscUJBQXFCO0FBTHlPLElBQU0sMkNBQTJDO0FBT3hULElBQU0sYUFBYSxjQUFjLHdDQUFlO0FBQ2hELElBQU0sWUFBWSxRQUFRLFVBQVU7QUFFcEMsSUFBTyxzQkFBUSxhQUFhO0FBQUEsRUFDMUIsU0FBUztBQUFBLElBQ1AsTUFBTTtBQUFBLElBQ04sb0JBQW9CO0FBQUEsSUFDcEIsWUFBWTtBQUFBO0FBQUEsRUFFZDtBQUFBLEVBQ0EsU0FBUztBQUFBLElBQ1AsT0FBTztBQUFBLE1BQ0wsS0FBSyxLQUFLLFFBQVEsV0FBVyxVQUFVLEtBQUs7QUFBQSxNQUM1QyxXQUFXLEtBQUssUUFBUSxXQUFXLFFBQVE7QUFBQSxJQUM3QztBQUFBLEVBQ0Y7QUFBQSxFQUNBLE1BQU0sS0FBSyxRQUFRLFdBQVcsUUFBUTtBQUFBLEVBQ3RDLE9BQU87QUFBQSxJQUNMLFFBQVEsS0FBSyxRQUFRLFdBQVcsZ0JBQWdCO0FBQUEsSUFDaEQsYUFBYTtBQUFBLEVBQ2Y7QUFDRixDQUFDOyIsCiAgIm5hbWVzIjogW10KfQo=

@@ -1306,17 +1306,13 @@ var vite_config_default = defineConfig({
   plugins: [
     react(),
     runtimeErrorOverlay(),
-    themePlugin(),
-    ...process.env.NODE_ENV !== "production" && process.env.REPL_ID !== void 0 ? [
-      await import("@replit/vite-plugin-cartographer").then(
-        (m) => m.cartographer()
-      )
-    ] : []
+    themePlugin()
+    // eventueel cartographer plugin handmatig toevoegen hier indien nodig
   ],
   resolve: {
     alias: {
-      "@": path3.resolve(__dirname2, "client", "src"),
-      "@shared": path3.resolve(__dirname2, "shared")
+      "@": path3.resolve(__dirname2, "./client/src"),
+      "@shared": path3.resolve(__dirname2, "./shared")
     }
   },
   root: path3.resolve(__dirname2, "client"),
@@ -1441,34 +1437,26 @@ process.on("unhandledRejection", (reason, promise) => {
 (async () => {
   try {
     log("Starting server setup...");
-    console.log("Server initialization beginning...");
     setupAuth(app);
     log("Authentication setup complete");
-    console.log("Authentication configured successfully");
     const server = await registerRoutes(app);
     log("Routes registered successfully");
-    console.log("API routes registered and configured");
     app.use((err, _req, res, _next) => {
       console.error("Server error:", err);
       const status = err.status || err.statusCode || 500;
       const message = err.message || "Internal Server Error";
       res.status(status).json({ message });
     });
-    if (app.get("env") === "development") {
+    if (process.env.NODE_ENV === "development") {
       await setupVite(app, server);
       log("Vite setup complete");
-      console.log("Development server (Vite) configured");
     } else {
       serveStatic(app);
       log("Static serving setup complete");
     }
-    const port = 5e3;
-    server.listen({
-      port,
-      host: "localhost"
-    }, () => {
-      console.log(`Server started successfully on http://localhost:${port}`);
-      log(`Server started successfully, serving on port ${port}`);
+    const port = process.env.PORT || 5e3;
+    server.listen(Number(port), () => {
+      log(`Server started on port ${port}`);
     });
   } catch (error) {
     console.error("Failed to start server:", error);
