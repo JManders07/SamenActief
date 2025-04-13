@@ -18,7 +18,8 @@ export default function Navigation() {
 
   const links = [
     { href: "/", label: "Startpagina", icon: Home },
-    { href: "/home", label: "Activiteitencentra", icon: Building2 },
+    // Only show application link for logged in users
+    ...(user ? [{ href: "/home", label: "Activiteitencentra", icon: Building2 }] : []),
     // Only show profile for regular users
     ...(user && user.role === 'user' ? [{ href: "/profile", label: "Mijn Profiel", icon: User }] : []),
     // Show admin page and stats for center admins
