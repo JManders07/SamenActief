@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
+import { TermsAndConditions } from "@/components/terms-and-conditions";
 //import { LocationSelector } from "@/components/location-selector"; // Removed as per edit
 
 const loginSchema = z.object({
@@ -39,6 +40,9 @@ const registerSchema = loginSchema.extend({
   neighborhood: z.string().min(1, "Wijk is verplicht"),
   anonymousParticipation: z.boolean().default(false),
   role: z.enum(['user', 'center_admin']),
+  acceptedTerms: z.boolean().refine((val) => val === true, {
+    message: "U moet akkoord gaan met de voorwaarden en privacyverklaring",
+  }),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
@@ -275,6 +279,22 @@ export default function AuthPage() {
                                 Alleen uw dorp en wijk worden getoond bij activiteiten
                               </FormDescription>
                             </div>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={registerForm.control}
+                        name="acceptedTerms"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <TermsAndConditions
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
