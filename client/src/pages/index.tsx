@@ -25,7 +25,7 @@ export default function Index() {
           />
         </div>
         <div className="relative container mx-auto px-4 h-full flex flex-col justify-center items-center text-white text-center">
-          <h1 className="text-6xl font-bold mb-6">Samen Actief</h1>
+          <h1 className="text-6xl font-bold mb-6">SamenActief</h1>
           <p className="text-2xl mb-8 max-w-2xl">
             Ontdek activiteiten in jouw buurt en kom in contact met anderen.
             Samen maken we de buurt levendiger!
