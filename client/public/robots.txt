@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /auth
+Disallow: /profile
+Disallow: /center-admin
+Disallow: /activity-stats
+
+Sitemap: https://samenactief.nl/sitemap.xml 
