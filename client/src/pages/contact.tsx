@@ -5,8 +5,19 @@ import { Mail, Phone, MapPin } from "lucide-react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { useState } from "react";
 
+// Extend Window interface to include grecaptcha
+declare global {
+  interface Window {
+    grecaptcha?: {
+      reset: () => void;
+    };
+  }
+}
+
 export default function ContactPage() {
   const [recaptchaValue, setRecaptchaValue] = useState<string | null>(null);
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -28,8 +39,46 @@ export default function ContactPage() {
       alert("Gelieve de reCAPTCHA te voltooien");
       return;
     }
-    // Hier zou je de form data en recaptchaValue naar je backend sturen
-    console.log("Form submitted:", { ...formData, recaptchaValue });
+    
+    setSubmitStatus("loading");
+    
+    // Stuur gegevens naar de backend
+    fetch("/api/contact", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...formData,
+        recaptchaValue,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.message) {
+          setSubmitStatus("success");
+          // Reset formulier na succesvolle verzending
+          setFormData({
+            name: "",
+            email: "",
+            subject: "",
+            message: "",
+          });
+          setRecaptchaValue(null);
+          // Als er een reCAPTCHA reset functie is, deze aanroepen
+          if (typeof window !== "undefined" && window.grecaptcha) {
+            window.grecaptcha.reset();
+          }
+        } else {
+          setSubmitStatus("error");
+          setErrorMessage(data.message || "Er is een onbekende fout opgetreden");
+        }
+      })
+      .catch((error) => {
+        console.error("Error submitting form:", error);
+        setSubmitStatus("error");
+        setErrorMessage("Er is een fout opgetreden bij het versturen van het formulier");
+      });
   };
 
   return (
@@ -108,16 +157,32 @@ export default function ContactPage() {
               </div>
               <div className="flex justify-center">
                 <ReCAPTCHA
-                  sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" // Vervang dit met je eigen site key
+                  sitekey="6LdemhorAAAAAImRDOrBSMqG9jdbAdnKKg0xMBDc" // Echte site key
                   onChange={(value) => setRecaptchaValue(value)}
                 />
               </div>
+              
+              {/* Feedback aan gebruiker */}
+              {submitStatus === "success" && (
+                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                  <strong className="font-bold">Bedankt! </strong>
+                  <span className="block sm:inline">Uw bericht is succesvol verzonden.</span>
+                </div>
+              )}
+              
+              {submitStatus === "error" && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                  <strong className="font-bold">Er is een fout opgetreden. </strong>
+                  <span className="block sm:inline">{errorMessage}</span>
+                </div>
+              )}
+              
               <Button
                 type="submit"
                 className="w-full bg-gray-900 hover:bg-gray-800"
-                disabled={!recaptchaValue}
+                disabled={!recaptchaValue || submitStatus === "loading"}
               >
-                Verstuur bericht
+                {submitStatus === "loading" ? "Bezig met verzenden..." : "Verstuur bericht"}
               </Button>
             </form>
           </div>

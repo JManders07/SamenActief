@@ -3,11 +3,12 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertUserSchema, insertRegistrationSchema, insertActivitySchema, insertCenterSchema, type User } from "@shared/schema";
 import { hashPassword } from "./auth";
-import { sendWelcomeEmail, sendActivityRegistrationEmail } from "./email";
+import { sendWelcomeEmail, sendActivityRegistrationEmail, sendEmail } from "./email";
 import multer from "multer";
 import path from "path";
 import { mkdir } from "fs/promises";
 import express from "express";
+import axios from "axios";
 
 // Middleware om te controleren of een gebruiker een center admin is
 function isCenterAdmin(req: Request, res: Response, next: NextFunction) {
@@ -711,6 +712,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error getting registrations:', error);
       res.status(500).json({ message: "Er is een fout opgetreden" });
+    }
+  });
+
+  // Contact form route with reCAPTCHA validation
+  app.post("/api/contact", async (req, res) => {
+    try {
+      const { name, email, subject, message, recaptchaValue } = req.body;
+      
+      // Verify reCAPTCHA
+      const recaptchaSecret = "6LdemhorAAAAAJcUfznxoM-vSe_SZwvmk9E3cNHB";
+      const recaptchaResponse = await axios.post(
+        "https://www.google.com/recaptcha/api/siteverify",
+        null,
+        {
+          params: {
+            secret: recaptchaSecret,
+            response: recaptchaValue,
+          },
+        }
+      );
+      
+      // Als de reCAPTCHA validatie mislukt, stuur een foutmelding
+      if (!recaptchaResponse.data.success) {
+        return res.status(400).json({ 
+          message: "reCAPTCHA validatie mislukt. Probeer het opnieuw."
+        });
+      }
+      
+      // Alle velden zijn verplicht
+      if (!name || !email || !subject || !message) {
+        return res.status(400).json({ 
+          message: "Alle velden zijn verplicht"
+        });
+      }
+      
+      // Stuur e-mail naar beheerder
+      const emailSent = await sendEmail({
+        to: "info@samenactief.nl", // Verander dit naar het e-mailadres waar de contactformulieren naartoe moeten
+        subject: `Nieuw contactformulier: ${subject}`,
+        html: `
+          <h2>Nieuw bericht via het contactformulier</h2>
+          <p><strong>Naam:</strong> ${name}</p>
+          <p><strong>E-mail:</strong> ${email}</p>
+          <p><strong>Onderwerp:</strong> ${subject}</p>
+          <p><strong>Bericht:</strong></p>
+          <p>${message}</p>
+        `
+      });
+      
+      if (emailSent) {
+        res.status(200).json({ message: "Uw bericht is succesvol verzonden" });
+      } else {
+        res.status(500).json({ message: "Er is een fout opgetreden bij het verzenden van uw bericht" });
+      }
+    } catch (error) {
+      console.error("Error in contact form:", error);
+      res.status(500).json({ message: "Er is een fout opgetreden bij het verwerken van uw bericht" });
     }
   });
 
