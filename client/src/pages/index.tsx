@@ -39,10 +39,10 @@ export default function Index() {
       {/* Feature Grid */}
       <div className="container mx-auto px-4 py-16">
         <div className="grid md:grid-cols-3 gap-8">
-          <div className="relative group cursor-pointer">
+          <div className="relative">
             <div className="aspect-[4/3] mb-4">
               <img
-                src="/activities-feature.jpg"
+                src="/Activiteiten.jpg"
                 alt="Activiteiten"
                 className="w-full h-full object-cover rounded-lg"
               />
@@ -52,12 +52,16 @@ export default function Index() {
               Ontdek een breed scala aan activiteiten in jouw buurt, van sport tot cultuur.
             </p>
           </div>
-          <div className="relative group cursor-pointer">
+          <div className="relative">
             <div className="aspect-[4/3] mb-4">
               <img
-                src="/centers-feature.jpg"
+                src="/Buurthuis.jpg"
                 alt="Buurthuizen"
                 className="w-full h-full object-cover rounded-lg"
+                onError={(e) => {
+                  console.error('Error loading image:', e);
+                  e.currentTarget.style.display = 'none';
+                }}
               />
             </div>
             <h3 className="text-2xl font-bold mb-2">Buurthuizen</h3>
@@ -65,10 +69,10 @@ export default function Index() {
               Vind buurthuizen bij jou in de buurt en maak kennis met je buren.
             </p>
           </div>
-          <div className="relative group cursor-pointer">
+          <div className="relative">
             <div className="aspect-[4/3] mb-4">
               <img
-                src="/together-feature.jpg"
+                src="/Samendoen.jpg"
                 alt="Samen Doen"
                 className="w-full h-full object-cover rounded-lg"
               />
