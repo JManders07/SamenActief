@@ -77,14 +77,14 @@ export default function AuthPage() {
 
   // Redirect if already logged in
   if (user) {
-    setLocation("/");
+    setLocation("/home");
     return null;
   }
 
   const onLogin = async (data: LoginForm) => {
     try {
       await login(data);
-      setLocation("/");
+      setLocation("/home");
     } catch (error) {
       console.error("Login failed:", error);
     }
@@ -93,7 +93,7 @@ export default function AuthPage() {
   const onRegister = async (data: RegisterForm) => {
     try {
       await register(data);
-      setLocation("/");
+      setLocation("/home");
     } catch (error) {
       console.error("Registration failed:", error);
     }
