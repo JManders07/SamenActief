@@ -105,7 +105,7 @@ export default function AuthPage() {
         <div className="flex flex-col justify-center space-y-6">
           <div className="flex flex-col items-center mb-4">
             <img 
-              src="/images/samenactief-logo.svg" 
+              src="/SamenActief.png" 
               alt="SamenActief Logo" 
               className="w-64 mx-auto mb-8" 
             />
@@ -419,7 +419,7 @@ export default function AuthPage() {
 
         <div className="hidden lg:block">
           <img
-            src="https://images.unsplash.com/photo-1517292987719-0369a794ec0f"
+            src="/Inlogpagina.jpeg"
             alt="Ouderen die samen activiteiten doen in de buurt"
             className="h-full w-full rounded-lg object-cover"
           />
