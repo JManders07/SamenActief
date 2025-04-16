@@ -146,8 +146,8 @@ export default function ContactPage() {
                   <div>
                     <h3 className="font-semibold">Adres</h3>
                     <p className="text-gray-600">
-                      SamenActief Straat 1<br />
-                      1234 AB Stad
+                      Rachelsmolen 1<br />
+                      5612 MA Eindhoven
                     </p>
                   </div>
                 </div>
