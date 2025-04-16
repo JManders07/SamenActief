@@ -494,7 +494,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
 
     // Send confirmation email if email service is configured
-    if (process.env.SENDGRID_API_KEY) {
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
       const user = await storage.getUser(req.body.userId);
       const center = await storage.getCenter(activity.centerId);
       if (user && center) {
@@ -659,7 +659,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Send welcome email if email service is configured
-      if (process.env.SENDGRID_API_KEY) {
+      if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
         await sendWelcomeEmail(user.username, user.displayName);
       }
 
