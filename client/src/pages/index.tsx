@@ -2,11 +2,13 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import type { Center } from "@shared/schema";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Index() {
   const { data: centers, isLoading } = useQuery<Center[]>({
     queryKey: ["/api/centers"],
   });
+  const { user } = useAuth();
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -31,7 +33,9 @@ export default function Index() {
             Samen maken we de buurt levendiger!
           </p>
           <Button asChild size="lg" className="text-lg bg-white text-gray-900 hover:bg-gray-100">
-            <Link href="/auth">Log in en bekijk activiteiten!</Link>
+            <Link href={user ? "/activities" : "/auth"}>
+              {user ? "Bekijk activiteiten!" : "Log in en bekijk activiteiten!"}
+            </Link>
           </Button>
         </div>
       </div>
