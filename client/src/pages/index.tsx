@@ -33,7 +33,7 @@ export default function Index() {
             Samen maken we de buurt levendiger!
           </p>
           <Button asChild size="lg" className="text-lg bg-white text-gray-900 hover:bg-gray-100">
-            <Link href={user ? "/activities" : "/auth"}>
+            <Link href={user ? "/home" : "/auth"}>
               {user ? "Bekijk activiteiten!" : "Log in en bekijk activiteiten!"}
             </Link>
           </Button>
