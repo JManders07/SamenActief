@@ -24,6 +24,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TermsAndConditions } from "@/components/terms-and-conditions";
+import { toast } from "sonner";
 //import { LocationSelector } from "@/components/location-selector"; // Removed as per edit
 
 const loginSchema = z.object({
@@ -51,7 +52,7 @@ type RegisterForm = z.infer<typeof registerSchema>;
 export default function AuthPage() {
   const [, setLocation] = useLocation();
   const { user, login, register } = useAuth();
-  const [activeTab, setActiveTab] = useState<"login" | "register" | "register_center">("login");
+  const [activeTab, setActiveTab] = useState<"login" | "register" | "register_center" | "forgot_password">("login");
 
   const loginForm = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -72,6 +73,15 @@ export default function AuthPage() {
       neighborhood: "",
       anonymousParticipation: false,
       role: 'user',
+    },
+  });
+
+  const forgotPasswordForm = useForm<{ email: string }>({
+    resolver: zodResolver(z.object({
+      email: z.string().email("Voer een geldig e-mailadres in"),
+    })),
+    defaultValues: {
+      email: "",
     },
   });
 
@@ -96,6 +106,29 @@ export default function AuthPage() {
       setLocation("/home");
     } catch (error) {
       console.error("Registration failed:", error);
+    }
+  };
+
+  const onForgotPassword = async (data: { email: string }) => {
+    try {
+      const response = await fetch("/api/password-reset/request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message);
+      }
+
+      toast.success(result.message);
+      setActiveTab("login");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Er is een fout opgetreden");
     }
   };
 
@@ -158,6 +191,17 @@ export default function AuthPage() {
                         )}
                       />
 
+                      <div className="flex justify-end">
+                        <Button
+                          type="button"
+                          variant="link"
+                          className="px-0"
+                          onClick={() => setActiveTab("forgot_password")}
+                        >
+                          Wachtwoord vergeten?
+                        </Button>
+                      </div>
+
                       <Button
                         type="submit"
                         className="w-full"
@@ -165,6 +209,47 @@ export default function AuthPage() {
                       >
                         {loginForm.formState.isSubmitting ? "Bezig..." : "Inloggen"}
                       </Button>
+                    </form>
+                  </Form>
+                </TabsContent>
+
+                <TabsContent value="forgot_password">
+                  <Form {...forgotPasswordForm}>
+                    <form
+                      onSubmit={forgotPasswordForm.handleSubmit(onForgotPassword)}
+                      className="space-y-4"
+                    >
+                      <FormField
+                        control={forgotPasswordForm.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>E-mailadres</FormLabel>
+                            <FormControl>
+                              <Input type="email" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <Button
+                        type="submit"
+                        className="w-full"
+                        disabled={forgotPasswordForm.formState.isSubmitting}
+                      >
+                        {forgotPasswordForm.formState.isSubmitting ? "Bezig..." : "Reset link aanvragen"}
+                      </Button>
+
+                      <div className="text-center">
+                        <Button
+                          type="button"
+                          variant="link"
+                          onClick={() => setActiveTab("login")}
+                        >
+                          Terug naar inloggen
+                        </Button>
+                      </div>
                     </form>
                   </Form>
                 </TabsContent>

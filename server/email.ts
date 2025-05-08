@@ -120,3 +120,21 @@ export async function sendActivityRegistrationEmail(
 
   return sendEmail({ to: email, subject, html });
 }
+
+export async function sendPasswordResetEmail(email: string, name: string, resetToken: string): Promise<boolean> {
+  const resetUrl = `${process.env.FRONTEND_URL || 'https://www.samenactiefonline.nl'}/reset-password?token=${resetToken}`;
+  const subject = "Wachtwoord reset aanvraag";
+  const html = `
+    <h1>Hallo ${name}!</h1>
+    <p>We hebben een verzoek ontvangen om je wachtwoord te resetten.</p>
+    <p>Klik op de onderstaande link om je wachtwoord te resetten:</p>
+    <div style="margin: 20px 0; padding: 15px; background-color: #f5f5f5; border-radius: 5px;">
+      <a href="${resetUrl}" style="color: #007bff; text-decoration: none;">Reset mijn wachtwoord</a>
+    </div>
+    <p>Deze link is 1 uur geldig.</p>
+    <p>Als je geen wachtwoord reset hebt aangevraagd, kun je deze email negeren.</p>
+    <p>Met vriendelijke groet,<br>Het Activiteitencentrum Team</p>
+  `;
+
+  return sendEmail({ to: email, subject, html });
+}

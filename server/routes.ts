@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertUserSchema, insertRegistrationSchema, insertActivitySchema, insertCenterSchema, type User } from "@shared/schema";
 import { hashPassword } from "./auth";
-import { sendWelcomeEmail, sendActivityRegistrationEmail, sendEmail } from "./email";
+import { sendWelcomeEmail, sendActivityRegistrationEmail, sendEmail, sendPasswordResetEmail } from "./email";
 import multer from "multer";
 import path from "path";
 import { mkdir } from "fs/promises";
@@ -796,6 +796,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (err) {
       next(err);
+    }
+  });
+
+  // Wachtwoord reset routes
+  app.post("/api/password-reset/request", async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "E-mailadres is verplicht" });
+      }
+
+      const user = await storage.getUserByUsername(email);
+      if (!user) {
+        // We geven geen foutmelding als de gebruiker niet bestaat om email harvesting te voorkomen
+        return res.status(200).json({ message: "Als dit e-mailadres bij ons bekend is, ontvangt u een e-mail met instructies" });
+      }
+
+      const resetToken = await storage.createPasswordResetToken(user.id);
+      await sendPasswordResetEmail(user.username, user.displayName, resetToken.token);
+
+      res.status(200).json({ message: "Als dit e-mailadres bij ons bekend is, ontvangt u een e-mail met instructies" });
+    } catch (error) {
+      console.error("Error in password reset request:", error);
+      res.status(500).json({ message: "Er is een fout opgetreden bij het verwerken van uw aanvraag" });
+    }
+  });
+
+  app.post("/api/password-reset/reset", async (req, res) => {
+    try {
+      const { token, newPassword } = req.body;
+
+      if (!token || !newPassword) {
+        return res.status(400).json({ message: "Token en nieuw wachtwoord zijn verplicht" });
+      }
+
+      const resetToken = await storage.getPasswordResetToken(token);
+      if (!resetToken) {
+        return res.status(400).json({ message: "Ongeldige of verlopen reset link" });
+      }
+
+      if (resetToken.used) {
+        return res.status(400).json({ message: "Deze reset link is al gebruikt" });
+      }
+
+      if (new Date() > resetToken.expiresAt) {
+        return res.status(400).json({ message: "Deze reset link is verlopen" });
+      }
+
+      const hashedPassword = await hashPassword(newPassword);
+      await storage.updateUser(resetToken.userId, { password: hashedPassword });
+      await storage.markPasswordResetTokenAsUsed(token);
+
+      res.status(200).json({ message: "Wachtwoord succesvol gewijzigd" });
+    } catch (error) {
+      console.error("Error in password reset:", error);
+      res.status(500).json({ message: "Er is een fout opgetreden bij het resetten van uw wachtwoord" });
     }
   });
 

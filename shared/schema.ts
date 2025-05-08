@@ -99,6 +99,14 @@ export const carpoolPassengers = pgTable("carpool_passengers", {
   passengerId: integer("passenger_id").notNull(),
 });
 
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  used: boolean("used").notNull().default(false)
+});
+
 // Insert schemas
 export const insertReminderSchema = createInsertSchema(reminders);
 export const insertWaitlistSchema = createInsertSchema(waitlist);
@@ -154,3 +162,6 @@ export type CarpoolPassenger = typeof carpoolPassengers.$inferSelect;
 // Add type for activity images
 export type ActivityImage = typeof activityImages.$inferSelect;
 export type InsertActivityImage = typeof activityImages.$inferInsert;
+
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+export type InsertPasswordResetToken = typeof passwordResetTokens.$inferInsert;

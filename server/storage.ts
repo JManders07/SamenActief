@@ -1,11 +1,12 @@
 import {
-  users, centers, activities, registrations, reminders, waitlist, carpools, carpoolPassengers, activityImages,
+  users, centers, activities, registrations, reminders, waitlist, carpools, carpoolPassengers, activityImages, passwordResetTokens,
   type User, type Center, type Activity, type Registration, type Reminder, type Waitlist, type Carpool, type CarpoolPassenger,
   type InsertUser, type InsertCenter, type InsertActivity, type InsertRegistration, type InsertReminder, type InsertWaitlist,
-  type InsertCarpool, type InsertCarpoolPassenger, type ActivityImage, type InsertActivityImage
+  type InsertCarpool, type InsertCarpoolPassenger, type ActivityImage, type InsertActivityImage, type PasswordResetToken, type InsertPasswordResetToken
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
+import { randomBytes } from "crypto";
 
 export interface IStorage {
   // Users
@@ -66,6 +67,11 @@ export interface IStorage {
   // User data deletion
   deleteUserData(userId: number): Promise<void>;
   deleteUser(userId: number): Promise<void>;
+
+  // Password Reset
+  createPasswordResetToken(userId: number): Promise<PasswordResetToken>;
+  getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined>;
+  markPasswordResetTokenAsUsed(token: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -263,7 +269,8 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async updateUser(id: number, data: { 
+  async updateUser(id: number, data: {
+    password?: string,
     anonymousParticipation?: boolean,
     displayName?: string,
     phone?: string,
@@ -542,6 +549,55 @@ export class DatabaseStorage implements IStorage {
       await db.delete(users).where(eq(users.id, userId));
     } catch (error) {
       console.error('Error in deleteUser:', error);
+      throw error;
+    }
+  }
+
+  async createPasswordResetToken(userId: number): Promise<PasswordResetToken> {
+    try {
+      const token = randomBytes(32).toString('hex');
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 1); // Token verloopt na 1 uur
+
+      const [resetToken] = await db
+        .insert(passwordResetTokens)
+        .values({
+          userId,
+          token,
+          expiresAt,
+          used: false
+        })
+        .returning();
+
+      return resetToken;
+    } catch (error) {
+      console.error('Error in createPasswordResetToken:', error);
+      throw error;
+    }
+  }
+
+  async getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined> {
+    try {
+      const [resetToken] = await db
+        .select()
+        .from(passwordResetTokens)
+        .where(eq(passwordResetTokens.token, token));
+
+      return resetToken;
+    } catch (error) {
+      console.error('Error in getPasswordResetToken:', error);
+      throw error;
+    }
+  }
+
+  async markPasswordResetTokenAsUsed(token: string): Promise<void> {
+    try {
+      await db
+        .update(passwordResetTokens)
+        .set({ used: true })
+        .where(eq(passwordResetTokens.token, token));
+    } catch (error) {
+      console.error('Error in markPasswordResetTokenAsUsed:', error);
       throw error;
     }
   }
