@@ -5,4 +5,4 @@ Disallow: /profile
 Disallow: /center-admin
 Disallow: /activity-stats
 
-Sitemap: https://samenactief.nl/sitemap.xml 
+Sitemap: https://samenactiefonline.nl/sitemap.xml 
