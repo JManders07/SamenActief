@@ -66,16 +66,6 @@ async function migrate() {
     `);
 
     await db.execute(sql`
-      CREATE TABLE IF NOT EXISTS password_reset_tokens (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        token TEXT NOT NULL UNIQUE,
-        expires_at TIMESTAMP NOT NULL,
-        used BOOLEAN NOT NULL DEFAULT false
-      );
-    `);
-
-    await db.execute(sql`
       CREATE TABLE IF NOT EXISTS waitlist (
         id SERIAL PRIMARY KEY,
         user_id INTEGER NOT NULL,

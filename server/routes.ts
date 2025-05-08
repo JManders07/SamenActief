@@ -9,6 +9,9 @@ import path from "path";
 import { mkdir } from "fs/promises";
 import express from "express";
 import axios from "axios";
+import { randomBytes } from "crypto";
+import { addHours } from "date-fns";
+import { insertPasswordResetTokenSchema } from "@shared/schema";
 
 // Middleware om te controleren of een gebruiker een center admin is
 function isCenterAdmin(req: Request, res: Response, next: NextFunction) {
@@ -799,60 +802,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Wachtwoord reset routes
-  app.post("/api/password-reset/request", async (req, res) => {
+  // Request password reset
+  app.post("/api/auth/request-password-reset", async (req, res, next) => {
     try {
       const { email } = req.body;
-      
       if (!email) {
-        return res.status(400).json({ message: "E-mailadres is verplicht" });
+        return res.status(400).json({ message: "Email is verplicht" });
       }
 
-      const user = await storage.getUserByUsername(email);
+      const user = await storage.getUserByEmail(email);
       if (!user) {
-        // We geven geen foutmelding als de gebruiker niet bestaat om email harvesting te voorkomen
-        return res.status(200).json({ message: "Als dit e-mailadres bij ons bekend is, ontvangt u een e-mail met instructies" });
+        // We geven geen foutmelding als de gebruiker niet bestaat om email enumeration te voorkomen
+        return res.status(200).json({ message: "Als er een account bestaat met dit emailadres, krijgt u een reset link toegestuurd" });
       }
 
-      const resetToken = await storage.createPasswordResetToken(user.id);
-      await sendPasswordResetEmail(user.username, user.displayName, resetToken.token);
+      // Genereer een unieke token
+      const token = randomBytes(32).toString('hex');
+      const expiresAt = addHours(new Date(), 1);
 
-      res.status(200).json({ message: "Als dit e-mailadres bij ons bekend is, ontvangt u een e-mail met instructies" });
-    } catch (error) {
-      console.error("Error in password reset request:", error);
-      res.status(500).json({ message: "Er is een fout opgetreden bij het verwerken van uw aanvraag" });
+      // Sla de token op in de database
+      await storage.createPasswordResetToken({
+        userId: user.id,
+        token,
+        expiresAt
+      });
+
+      // Stuur de reset email
+      await sendPasswordResetEmail(email, token);
+
+      res.status(200).json({ message: "Als er een account bestaat met dit emailadres, krijgt u een reset link toegestuurd" });
+    } catch (err) {
+      next(err);
     }
   });
 
-  app.post("/api/password-reset/reset", async (req, res) => {
+  // Reset password
+  app.post("/api/auth/reset-password", async (req, res, next) => {
     try {
       const { token, newPassword } = req.body;
-
       if (!token || !newPassword) {
         return res.status(400).json({ message: "Token en nieuw wachtwoord zijn verplicht" });
       }
 
+      // Verifieer de token
       const resetToken = await storage.getPasswordResetToken(token);
-      if (!resetToken) {
+      if (!resetToken || resetToken.expiresAt < new Date()) {
         return res.status(400).json({ message: "Ongeldige of verlopen reset link" });
       }
 
-      if (resetToken.used) {
-        return res.status(400).json({ message: "Deze reset link is al gebruikt" });
-      }
-
-      if (new Date() > resetToken.expiresAt) {
-        return res.status(400).json({ message: "Deze reset link is verlopen" });
-      }
-
+      // Update het wachtwoord
       const hashedPassword = await hashPassword(newPassword);
-      await storage.updateUser(resetToken.userId, { password: hashedPassword });
-      await storage.markPasswordResetTokenAsUsed(token);
+      await storage.updateUserPassword(resetToken.userId, hashedPassword);
+
+      // Verwijder de gebruikte token
+      await storage.deletePasswordResetToken(token);
 
       res.status(200).json({ message: "Wachtwoord succesvol gewijzigd" });
-    } catch (error) {
-      console.error("Error in password reset:", error);
-      res.status(500).json({ message: "Er is een fout opgetreden bij het resetten van uw wachtwoord" });
+    } catch (err) {
+      next(err);
     }
   });
 
