@@ -772,5 +772,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete user account
+  app.delete("/api/users/:id", async (req, res, next) => {
+    try {
+      const userId = parseInt(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      if (!req.isAuthenticated() || req.user?.id !== userId) {
+        return res.sendStatus(403);
+      }
+
+      // Verwijder eerst alle gerelateerde data
+      await storage.deleteUserData(userId);
+      
+      // Verwijder het account
+      await storage.deleteUser(userId);
+
+      // Log de gebruiker uit
+      req.logout((err) => {
+        if (err) return next(err);
+        res.sendStatus(200);
+      });
+    } catch (err) {
+      next(err);
+    }
+  });
+
   return httpServer;
 }

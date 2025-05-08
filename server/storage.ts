@@ -62,6 +62,10 @@ export interface IStorage {
   createActivityImage(image: InsertActivityImage): Promise<ActivityImage>;
   getActivityImages(activityId: number): Promise<ActivityImage[]>;
   deleteActivityImage(id: number): Promise<void>;
+
+  // User data deletion
+  deleteUserData(userId: number): Promise<void>;
+  deleteUser(userId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -493,6 +497,37 @@ export class DatabaseStorage implements IStorage {
       await db.delete(activityImages).where(eq(activityImages.id, id));
     } catch (error) {
       console.error('Error in deleteActivityImage:', error);
+      throw error;
+    }
+  }
+
+  async deleteUserData(userId: number): Promise<void> {
+    try {
+      // Verwijder alle registraties
+      await db.delete(registrations).where(eq(registrations.userId, userId));
+      
+      // Verwijder alle wachtlijst inschrijvingen
+      await db.delete(waitlist).where(eq(waitlist.userId, userId));
+      
+      // Verwijder alle herinneringen
+      await db.delete(reminders).where(eq(reminders.userId, userId));
+      
+      // Verwijder alle carpool inschrijvingen
+      await db.delete(carpoolPassengers).where(eq(carpoolPassengers.userId, userId));
+      
+      // Verwijder alle carpool aanbiedingen
+      await db.delete(carpools).where(eq(carpools.driverId, userId));
+    } catch (error) {
+      console.error('Error in deleteUserData:', error);
+      throw error;
+    }
+  }
+
+  async deleteUser(userId: number): Promise<void> {
+    try {
+      await db.delete(users).where(eq(users.id, userId));
+    } catch (error) {
+      console.error('Error in deleteUser:', error);
       throw error;
     }
   }

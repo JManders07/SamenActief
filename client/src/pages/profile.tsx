@@ -7,23 +7,36 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Activity } from "@shared/schema";
-import { Building2, MapPin, Edit, Save, X } from "lucide-react";
+import { Building2, MapPin, Edit, Save, X, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RemindersPanel } from "@/components/reminders-panel";
 import AccessibilitySettings from "@/components/accessibility-settings";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useLocation } from "wouter";
 
 export default function Profile() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     displayName: "",
     phone: "",
     village: "",
     neighborhood: "",
-    username: "" // Add email field
+    username: ""
   });
 
   const { data: myActivities, isLoading: isLoadingActivities } = useQuery<Activity[]>({
@@ -55,7 +68,6 @@ export default function Profile() {
       });
     },
     onSuccess: () => {
-      // Fixed: Added type check for user before accessing its id
       if (user) {
         queryClient.invalidateQueries({ queryKey: [`/api/users/${user.id}/activities`] });
       }
@@ -88,6 +100,27 @@ export default function Profile() {
     },
   });
 
+  const deleteAccount = useMutation({
+    mutationFn: async () => {
+      if (!user) return;
+      await apiRequest("DELETE", `/api/users/${user.id}`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Account verwijderd",
+        description: "Uw account is succesvol verwijderd.",
+      });
+      setLocation("/");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Fout bij verwijderen",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleEditClick = () => {
     if (user) {
       setFormData({
@@ -95,7 +128,7 @@ export default function Profile() {
         phone: user.phone,
         village: user.village,
         neighborhood: user.neighborhood,
-        username: user.username // Include username in formData
+        username: user.username
       });
       setIsEditing(true);
     }
@@ -139,11 +172,38 @@ export default function Profile() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between text-2xl font-bold">
           <span>Mijn Profiel</span>
-          {!isEditing ? (
-            <Button variant="outline" size="icon" onClick={handleEditClick}>
-              <Edit className="h-4 w-4" />
-            </Button>
-          ) : null}
+          <div className="flex gap-2">
+            {!isEditing ? (
+              <Button variant="outline" size="icon" onClick={handleEditClick}>
+                <Edit className="h-4 w-4" />
+              </Button>
+            ) : null}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="icon">
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Account verwijderen</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Weet u zeker dat u uw account wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+                    Alle uw gegevens, inschrijvingen en activiteiten zullen permanent worden verwijderd.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Annuleren</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => deleteAccount.mutate()}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Account verwijderen
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
