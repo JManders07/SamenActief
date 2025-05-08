@@ -40,6 +40,39 @@ export default function Index() {
         </div>
       </div>
 
+      {/* Help Section */}
+      <div className="container mx-auto px-4 py-16">
+        <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-12 rounded-2xl text-center shadow-2xl">
+          <h2 className="text-5xl font-bold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">
+            Over SamenActief
+          </h2>
+          <div className="max-w-3xl mx-auto space-y-6">
+            <p className="text-xl leading-relaxed">
+              SamenActief is ontstaan vanuit de wens om buurten levendiger en socialer te maken. 
+              Wij geloven dat echte verbinding tussen mensen begint met het samen doen van activiteiten.
+            </p>
+            <p className="text-xl leading-relaxed">
+              Ons platform brengt buurtbewoners, buurthuizen en lokale organisaties bij elkaar. 
+              Of je nu op zoek bent naar een leuke activiteit, een buurthuis wilt beheren of een 
+              initiatief wilt starten - bij SamenActief ben je aan het juiste adres.
+            </p>
+            <p className="text-xl leading-relaxed font-medium">
+              Samen maken we buurten sterker, socialer en actiever. Doe je mee?
+            </p>
+          </div>
+          <div className="mt-10">
+            <Button 
+              asChild 
+              variant="secondary" 
+              size="lg" 
+              className="bg-white text-gray-900 hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg"
+            >
+              <Link href="/contact">Neem contact op</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+
       {/* Feature Grid */}
       <div className="container mx-auto px-4 py-16">
         <div className="grid md:grid-cols-3 gap-8">
@@ -111,39 +144,6 @@ export default function Index() {
           </div>
         </div>
       )}
-
-      {/* Help Section */}
-      <div className="container mx-auto px-4 py-16">
-        <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-12 rounded-2xl text-center shadow-2xl">
-          <h2 className="text-5xl font-bold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">
-            Over SamenActief
-          </h2>
-          <div className="max-w-3xl mx-auto space-y-6">
-            <p className="text-xl leading-relaxed">
-              SamenActief is ontstaan vanuit de wens om buurten levendiger en socialer te maken. 
-              Wij geloven dat echte verbinding tussen mensen begint met het samen doen van activiteiten.
-            </p>
-            <p className="text-xl leading-relaxed">
-              Ons platform brengt buurtbewoners, buurthuizen en lokale organisaties bij elkaar. 
-              Of je nu op zoek bent naar een leuke activiteit, een buurthuis wilt beheren of een 
-              initiatief wilt starten - bij SamenActief ben je aan het juiste adres.
-            </p>
-            <p className="text-xl leading-relaxed font-medium">
-              Samen maken we buurten sterker, socialer en actiever. Doe je mee?
-            </p>
-          </div>
-          <div className="mt-10">
-            <Button 
-              asChild 
-              variant="secondary" 
-              size="lg" 
-              className="bg-white text-gray-900 hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg"
-            >
-              <Link href="/contact">Neem contact op</Link>
-            </Button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
