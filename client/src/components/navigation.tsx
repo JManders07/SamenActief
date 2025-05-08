@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
-import { Building2, User, Eye, Settings, BarChart, HelpCircle, Home, Mail } from "lucide-react";
+import { Building2, User, Eye, Settings, BarChart, HelpCircle, Home, Mail, Info } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
 import { Button } from "./ui/button";
@@ -30,7 +30,8 @@ export default function Navigation() {
     // Help page accessible only to regular users or when not logged in
     ...(!user?.role || user?.role === 'user' ? [
       { href: "/help", label: "Hulp", icon: HelpCircle },
-      { href: "/contact", label: "Contact", icon: Mail }
+      { href: "/contact", label: "Contact", icon: Mail },
+      { href: "/about", label: "Over Ons", icon: Info }
     ] : []),
   ];
 

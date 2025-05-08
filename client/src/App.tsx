@@ -15,6 +15,7 @@ import CenterAdmin from "@/pages/center-admin";
 import ActivityStats from "@/pages/activity-stats";
 import Help from "@/pages/help";
 import Contact from "@/pages/contact";
+import About from "@/pages/about";
 import Navigation from "@/components/navigation";
 
 function Router() {
@@ -30,6 +31,7 @@ function Router() {
       <Route path="/activity-stats" component={ActivityStats} />
       <Route path="/help" component={Help} />
       <Route path="/contact" component={Contact} />
+      <Route path="/about" component={About} />
       <Route component={NotFound} />
     </Switch>
   );
