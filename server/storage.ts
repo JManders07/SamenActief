@@ -503,20 +503,34 @@ export class DatabaseStorage implements IStorage {
 
   async deleteUserData(userId: number): Promise<void> {
     try {
-      // Verwijder alle registraties
-      await db.delete(registrations).where(eq(registrations.userId, userId));
-      
-      // Verwijder alle wachtlijst inschrijvingen
-      await db.delete(waitlist).where(eq(waitlist.userId, userId));
-      
-      // Verwijder alle herinneringen
-      await db.delete(reminders).where(eq(reminders.userId, userId));
-      
-      // Verwijder alle carpool inschrijvingen
-      await db.delete(carpoolPassengers).where(eq(carpoolPassengers.userId, userId));
-      
-      // Verwijder alle carpool aanbiedingen
-      await db.delete(carpools).where(eq(carpools.driverId, userId));
+      await db.transaction(async (tx) => {
+        // Controleer eerst of de gebruiker een buurthuis beheerder is
+        const userCenters: Center[] = await tx.select().from(centers).where(eq(centers.adminId, userId));
+        
+        // Als er een buurthuis is, verwijder eerst alle gerelateerde data van het buurthuis
+        for (const center of userCenters) {
+          // Verwijder alle activiteiten van het buurthuis
+          const centerActivities: Activity[] = await tx.select().from(activities).where(eq(activities.centerId, center.id));
+          for (const activity of centerActivities) {
+            // Verwijder alle gerelateerde data voor deze activiteit
+            await tx.delete(registrations).where(eq(registrations.activityId, activity.id));
+            await tx.delete(waitlist).where(eq(waitlist.activityId, activity.id));
+            await tx.delete(reminders).where(eq(reminders.activityId, activity.id));
+            await tx.delete(carpools).where(eq(carpools.activityId, activity.id));
+            await tx.delete(activityImages).where(eq(activityImages.activityId, activity.id));
+            await tx.delete(activities).where(eq(activities.id, activity.id));
+          }
+          // Verwijder het buurthuis
+          await tx.delete(centers).where(eq(centers.id, center.id));
+        }
+        
+        // Verwijder alle gebruikersgerelateerde data
+        await tx.delete(registrations).where(eq(registrations.userId, userId));
+        await tx.delete(waitlist).where(eq(waitlist.userId, userId));
+        await tx.delete(reminders).where(eq(reminders.userId, userId));
+        await tx.delete(carpoolPassengers).where(eq(carpoolPassengers.passengerId, userId));
+        await tx.delete(carpools).where(eq(carpools.driverId, userId));
+      });
     } catch (error) {
       console.error('Error in deleteUserData:', error);
       throw error;
