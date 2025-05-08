@@ -127,7 +127,7 @@ export async function sendPasswordResetEmail(email: string, resetToken: string):
   
   const html = `
     <h1>Wachtwoord reset</h1>
-    <p>U heeft een wachtwoord reset aangevraagd voor uw account bij het Activiteitencentrum.</p>
+    <p>U heeft een wachtwoord reset aangevraagd voor uw account bij SamenActief.</p>
     <p>Klik op de onderstaande link om uw wachtwoord te resetten:</p>
     <p><a href="${resetUrl}">${resetUrl}</a></p>
     <p>Deze link is 1 uur geldig.</p>
