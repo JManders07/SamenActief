@@ -99,21 +99,11 @@ export const carpoolPassengers = pgTable("carpool_passengers", {
   passengerId: integer("passenger_id").notNull(),
 });
 
-// Password reset tokens table
-export const passwordResetTokens = pgTable('password_reset_tokens', {
-  id: serial('id').primaryKey(),
-  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  token: text('token').notNull(),
-  expiresAt: timestamp('expires_at').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-});
-
 // Insert schemas
 export const insertReminderSchema = createInsertSchema(reminders);
 export const insertWaitlistSchema = createInsertSchema(waitlist);
 export const insertCarpoolSchema = createInsertSchema(carpools);
 export const insertCarpoolPassengerSchema = createInsertSchema(carpoolPassengers);
-export const insertPasswordResetTokenSchema = createInsertSchema(passwordResetTokens);
 
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
@@ -151,7 +141,6 @@ export type InsertReminder = z.infer<typeof insertReminderSchema>;
 export type InsertWaitlist = z.infer<typeof insertWaitlistSchema>;
 export type InsertCarpool = z.infer<typeof insertCarpoolSchema>;
 export type InsertCarpoolPassenger = z.infer<typeof insertCarpoolPassengerSchema>;
-export type InsertPasswordResetToken = z.infer<typeof insertPasswordResetTokenSchema>;
 
 export type User = typeof users.$inferSelect;
 export type Center = typeof centers.$inferSelect;

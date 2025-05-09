@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -51,9 +51,7 @@ type RegisterForm = z.infer<typeof registerSchema>;
 export default function AuthPage() {
   const [, setLocation] = useLocation();
   const { user, login, register } = useAuth();
-  const [activeTab, setActiveTab] = useState<"login" | "register" | "register_center" | "forgot_password">("login");
-  const [resetEmailSent, setResetEmailSent] = useState(false);
-  const [resetToken, setResetToken] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"login" | "register" | "register_center">("login");
 
   const loginForm = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -74,29 +72,6 @@ export default function AuthPage() {
       neighborhood: "",
       anonymousParticipation: false,
       role: 'user',
-    },
-  });
-
-  const forgotPasswordForm = useForm<{ email: string }>({
-    resolver: zodResolver(z.object({
-      email: z.string().email("Ongeldig emailadres")
-    })),
-    defaultValues: {
-      email: "",
-    },
-  });
-
-  const resetPasswordForm = useForm<{ password: string; confirmPassword: string }>({
-    resolver: zodResolver(z.object({
-      password: z.string().min(8, "Wachtwoord moet minimaal 8 karakters lang zijn"),
-      confirmPassword: z.string()
-    }).refine((data) => data.password === data.confirmPassword, {
-      message: "Wachtwoorden komen niet overeen",
-      path: ["confirmPassword"],
-    })),
-    defaultValues: {
-      password: "",
-      confirmPassword: "",
     },
   });
 
@@ -124,59 +99,6 @@ export default function AuthPage() {
     }
   };
 
-  const onForgotPassword = async (data: { email: string }) => {
-    try {
-      const response = await fetch("/api/auth/request-password-reset", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      
-      if (response.ok) {
-        setResetEmailSent(true);
-      } else {
-        const error = await response.json();
-        throw new Error(error.message);
-      }
-    } catch (error) {
-      console.error("Password reset request failed:", error);
-    }
-  };
-
-  const onResetPassword = async (data: { password: string }) => {
-    if (!resetToken) return;
-
-    try {
-      const response = await fetch("/api/auth/reset-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          token: resetToken,
-          newPassword: data.password,
-        }),
-      });
-
-      if (response.ok) {
-        setLocation("/auth");
-      } else {
-        const error = await response.json();
-        throw new Error(error.message);
-      }
-    } catch (error) {
-      console.error("Password reset failed:", error);
-    }
-  };
-
-  // Check for reset token in URL
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
-    if (token) {
-      setResetToken(token);
-      setActiveTab("forgot_password");
-    }
-  }, []);
-
   return (
     <div className="container mx-auto flex min-h-screen items-center justify-center px-4 py-8">
       <div className="grid w-full gap-8 lg:grid-cols-2">
@@ -196,11 +118,10 @@ export default function AuthPage() {
           <Card>
             <CardContent className="pt-6">
               <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="login">Inloggen</TabsTrigger>
                   <TabsTrigger value="register">Registreren</TabsTrigger>
                   <TabsTrigger value="register_center">Buurthuis Registreren</TabsTrigger>
-                  <TabsTrigger value="forgot_password">Wachtwoord Vergeten</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="login">
@@ -490,89 +411,6 @@ export default function AuthPage() {
                       </Button>
                     </form>
                   </Form>
-                </TabsContent>
-
-                <TabsContent value="forgot_password">
-                  {resetEmailSent ? (
-                    <div className="space-y-4">
-                      <p className="text-center text-muted-foreground">
-                        Als er een account bestaat met dit emailadres, krijgt u een reset link toegestuurd.
-                      </p>
-                      <Button
-                        className="w-full"
-                        onClick={() => {
-                          setResetEmailSent(false);
-                          setActiveTab("login");
-                        }}
-                      >
-                        Terug naar inloggen
-                      </Button>
-                    </div>
-                  ) : resetToken ? (
-                    <Form {...resetPasswordForm}>
-                      <form
-                        onSubmit={resetPasswordForm.handleSubmit(onResetPassword)}
-                        className="space-y-4"
-                      >
-                        <FormField
-                          control={resetPasswordForm.control}
-                          name="password"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Nieuw wachtwoord</FormLabel>
-                              <FormControl>
-                                <Input type="password" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={resetPasswordForm.control}
-                          name="confirmPassword"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Bevestig wachtwoord</FormLabel>
-                              <FormControl>
-                                <Input type="password" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <Button type="submit" className="w-full">
-                          Wachtwoord wijzigen
-                        </Button>
-                      </form>
-                    </Form>
-                  ) : (
-                    <Form {...forgotPasswordForm}>
-                      <form
-                        onSubmit={forgotPasswordForm.handleSubmit(onForgotPassword)}
-                        className="space-y-4"
-                      >
-                        <FormField
-                          control={forgotPasswordForm.control}
-                          name="email"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>E-mailadres</FormLabel>
-                              <FormControl>
-                                <Input type="email" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <Button type="submit" className="w-full">
-                          Reset link aanvragen
-                        </Button>
-                      </form>
-                    </Form>
-                  )}
                 </TabsContent>
               </Tabs>
             </CardContent>

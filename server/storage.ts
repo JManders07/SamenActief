@@ -2,7 +2,7 @@ import {
   users, centers, activities, registrations, reminders, waitlist, carpools, carpoolPassengers, activityImages,
   type User, type Center, type Activity, type Registration, type Reminder, type Waitlist, type Carpool, type CarpoolPassenger,
   type InsertUser, type InsertCenter, type InsertActivity, type InsertRegistration, type InsertReminder, type InsertWaitlist,
-  type InsertCarpool, type InsertCarpoolPassenger, type ActivityImage, type InsertActivityImage, type InsertPasswordResetToken
+  type InsertCarpool, type InsertCarpoolPassenger, type ActivityImage, type InsertActivityImage
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
@@ -66,12 +66,6 @@ export interface IStorage {
   // User data deletion
   deleteUserData(userId: number): Promise<void>;
   deleteUser(userId: number): Promise<void>;
-
-  // Password reset tokens
-  createPasswordResetToken(data: InsertPasswordResetToken): Promise<InsertPasswordResetToken>;
-  getPasswordResetToken(token: string): Promise<InsertPasswordResetToken | undefined>;
-  deletePasswordResetToken(token: string): Promise<void>;
-  updateUserPassword(userId: number, hashedPassword: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -551,13 +545,6 @@ export class DatabaseStorage implements IStorage {
       throw error;
     }
   }
+}
 
-  async createPasswordResetToken(data: InsertPasswordResetToken) {
-    const result = await db.insert(passwordResetTokens).values(data).returning();
-    return result[0];
-  }
-
-  async getPasswordResetToken(token: string) {
-    const result = await db
-      .select()
 export const storage = new DatabaseStorage();

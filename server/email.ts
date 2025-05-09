@@ -120,19 +120,3 @@ export async function sendActivityRegistrationEmail(
 
   return sendEmail({ to: email, subject, html });
 }
-
-export async function sendPasswordResetEmail(email: string, resetToken: string): Promise<boolean> {
-  const subject = "Wachtwoord reset voor Activiteitencentrum";
-  const resetUrl = `https://www.samenactiefonline.nl/reset-password?token=${resetToken}`;
-  
-  const html = `
-    <h1>Wachtwoord reset</h1>
-    <p>U heeft een wachtwoord reset aangevraagd voor uw account bij SamenActief.</p>
-    <p>Klik op de onderstaande link om uw wachtwoord te resetten:</p>
-    <p><a href="${resetUrl}">${resetUrl}</a></p>
-    <p>Deze link is 1 uur geldig.</p>
-    <p>Als u geen wachtwoord reset heeft aangevraagd, kunt u deze email negeren.</p>
-  `;
-
-  return sendEmail({ to: email, subject, html });
-}
