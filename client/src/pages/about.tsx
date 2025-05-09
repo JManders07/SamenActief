@@ -1,25 +1,11 @@
-import { useAuth } from "@/hooks/use-auth";
-import { useTheme } from "@/hooks/use-theme";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye } from "lucide-react";
 
 export default function AboutPage() {
-  const { theme, toggleAccessibilityMode } = useTheme();
-  const { user } = useAuth();
-
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-4xl font-bold">Over SamenActief</h1>
-        {!theme.isAccessibilityMode && (
-          <Button variant="outline" onClick={toggleAccessibilityMode} className="flex items-center gap-2">
-            <Eye className="h-5 w-5" />
-            <span>Activeer grotere letters</span>
-          </Button>
-        )}
       </div>
-
       <div className="space-y-6">
         <Card>
           <CardHeader>
@@ -38,73 +24,89 @@ export default function AboutPage() {
           {/* Oprichters */}
           <Card>
             <CardHeader>
-              <CardTitle>Naam Oprichter 1</CardTitle>
-              <CardDescription>Functie</CardDescription>
+              <CardTitle>Jelle</CardTitle>
+              <CardDescription>Oprichter en ontwikkelaar</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="aspect-square w-full bg-muted rounded-lg mb-4"></div>
-              <p>Beschrijving van de oprichter en hun rol binnen SamenActief.</p>
+              <div className="aspect-square w-full mb-4 overflow-hidden rounded-lg">
+                <img
+                  src="/Jelle.png"
+                  alt="Jelle"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <p>Ontwikkelaar van SamenActief en gedreven om mensen samen te brengen</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Naam Oprichter 2</CardTitle>
-              <CardDescription>Functie</CardDescription>
+              <CardTitle>Wessel</CardTitle>
+              <CardDescription>Oprichter en ontwikkelaar</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="aspect-square w-full bg-muted rounded-lg mb-4"></div>
-              <p>Beschrijving van de oprichter en hun rol binnen SamenActief.</p>
+              <div className="aspect-square w-full mb-4 overflow-hidden rounded-lg">
+                <img
+                  src="/Wessel.jpg"
+                  alt="Wessel"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <p>Ontwikkelaar van SamenActief</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Naam Oprichter 3</CardTitle>
-              <CardDescription>Functie</CardDescription>
+              <CardTitle>Siem</CardTitle>
+              <CardDescription>Oprichter en hoofd sales</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="aspect-square w-full bg-muted rounded-lg mb-4"></div>
-              <p>Beschrijving van de oprichter en hun rol binnen SamenActief.</p>
+              <div className="aspect-square w-full mb-4 overflow-hidden rounded-lg">
+                <img
+                  src="/Siem.jpg"
+                  alt="Siem"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <p>Medeoprichter van SamenActief met focus op inclusieve sportactiviteiten.</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Naam Oprichter 4</CardTitle>
-              <CardDescription>Functie</CardDescription>
+              <CardTitle>Ralf</CardTitle>
+              <CardDescription>Oprichter en hoofd marketing</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="aspect-square w-full bg-muted rounded-lg mb-4"></div>
-              <p>Beschrijving van de oprichter en hun rol binnen SamenActief.</p>
+              <div className="aspect-square w-full mb-4 overflow-hidden rounded-lg">
+                <img
+                  src="/Ralf.jpg"
+                  alt="Ralf"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <p>Medeoprichter van SamenActief met expertise in sportorganisatie.</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Naam Oprichter 5</CardTitle>
-              <CardDescription>Functie</CardDescription>
+              <CardTitle>Bjorn</CardTitle>
+              <CardDescription>Oprichter en hoofd financiën</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="aspect-square w-full bg-muted rounded-lg mb-4"></div>
-              <p>Beschrijving van de oprichter en hun rol binnen SamenActief.</p>
+              <div className="aspect-square w-full mb-4 overflow-hidden rounded-lg">
+                <img
+                  src="/Bjorn.jpg"
+                  alt="Bjorn"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <p>Medeoprichter van SamenActief met toewijding aan community building.</p>
             </CardContent>
           </Card>
         </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Onze Visie</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-lg">
-              Bij SamenActief streven we ernaar om een inclusieve gemeenschap te creëren waar iedereen zich welkom voelt. 
-              Door sport en activiteiten als middel te gebruiken, willen we mensen verbinden en bijdragen aan een gezondere 
-              en gelukkigere samenleving. Onze platform maakt het gemakkelijk om activiteiten te vinden, te organiseren en 
-              nieuwe mensen te ontmoeten die dezelfde interesses delen.
-            </p>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
