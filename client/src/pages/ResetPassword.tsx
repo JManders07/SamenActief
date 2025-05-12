@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useLocation, useRoute } from 'wouter';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -24,8 +24,8 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function ResetPassword() {
-  const { token } = useParams();
-  const navigate = useNavigate();
+  const [, params] = useRoute('/reset-password/:token');
+  const [, navigate] = useLocation();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<FormData>({
@@ -39,7 +39,7 @@ export default function ResetPassword() {
   const onSubmit = async (data: FormData) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/reset-password/${token}`, {
+      const response = await fetch(`/api/reset-password/${params?.token}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,7 +53,7 @@ export default function ResetPassword() {
       }
 
       toast.success('Wachtwoord succesvol gewijzigd');
-      navigate('/login');
+      navigate('/auth');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Er is een fout opgetreden');
     } finally {
