@@ -123,7 +123,7 @@ export async function sendActivityRegistrationEmail(
 
 export async function sendPasswordResetEmail(email: string, resetToken: string): Promise<boolean> {
   const subject = "Wachtwoord reset verzoek";
-  const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+  const resetUrl = `https://www.samenactiefonline.nl/reset-password/${resetToken}`;
   
   const html = `
     <h1>Wachtwoord reset verzoek</h1>
