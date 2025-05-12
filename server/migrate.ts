@@ -109,6 +109,17 @@ async function migrate() {
       ADD COLUMN IF NOT EXISTS facilities_available TEXT;
     `);
 
+    // Create password_reset_tokens table
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS password_reset_tokens (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        token TEXT NOT NULL UNIQUE,
+        expires_at TIMESTAMP NOT NULL,
+        used BOOLEAN NOT NULL DEFAULT false
+      );
+    `);
+
     console.log("Migration completed successfully!");
   } catch (error) {
     console.error("Migration failed:", error);

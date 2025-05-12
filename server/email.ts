@@ -120,3 +120,23 @@ export async function sendActivityRegistrationEmail(
 
   return sendEmail({ to: email, subject, html });
 }
+
+export async function sendPasswordResetEmail(email: string, resetToken: string): Promise<boolean> {
+  const subject = "Wachtwoord reset verzoek";
+  const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+  
+  const html = `
+    <h1>Wachtwoord reset verzoek</h1>
+    <p>U heeft een verzoek ingediend om uw wachtwoord te resetten.</p>
+    <p>Klik op de onderstaande link om een nieuw wachtwoord in te stellen:</p>
+    <p>
+      <a href="${resetUrl}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">
+        Reset mijn wachtwoord
+      </a>
+    </p>
+    <p>Deze link is 1 uur geldig.</p>
+    <p>Als u geen wachtwoord reset heeft aangevraagd, kunt u deze e-mail negeren.</p>
+  `;
+
+  return sendEmail({ to: email, subject, html });
+}

@@ -1,8 +1,10 @@
 import {
   users, centers, activities, registrations, reminders, waitlist, carpools, carpoolPassengers, activityImages,
+  passwordResetTokens,
   type User, type Center, type Activity, type Registration, type Reminder, type Waitlist, type Carpool, type CarpoolPassenger,
   type InsertUser, type InsertCenter, type InsertActivity, type InsertRegistration, type InsertReminder, type InsertWaitlist,
-  type InsertCarpool, type InsertCarpoolPassenger, type ActivityImage, type InsertActivityImage
+  type InsertCarpool, type InsertCarpoolPassenger, type ActivityImage, type InsertActivityImage,
+  type PasswordReset, type InsertPasswordReset
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
@@ -66,6 +68,14 @@ export interface IStorage {
   // User data deletion
   deleteUserData(userId: number): Promise<void>;
   deleteUser(userId: number): Promise<void>;
+
+  // Password Reset
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createPasswordReset(reset: InsertPasswordReset): Promise<PasswordReset>;
+  getPasswordReset(token: string): Promise<PasswordReset | undefined>;
+  deletePasswordReset(token: string): Promise<void>;
+  updateUserPassword(userId: number, hashedPassword: string): Promise<User>;
+  markPasswordResetAsUsed(token: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -542,6 +552,71 @@ export class DatabaseStorage implements IStorage {
       await db.delete(users).where(eq(users.id, userId));
     } catch (error) {
       console.error('Error in deleteUser:', error);
+      throw error;
+    }
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    try {
+      const [user] = await db.select().from(users).where(eq(users.username, email));
+      return user;
+    } catch (error) {
+      console.error('Error in getUserByEmail:', error);
+      throw error;
+    }
+  }
+
+  async createPasswordReset(reset: InsertPasswordReset): Promise<PasswordReset> {
+    try {
+      const [passwordReset] = await db.insert(passwordResetTokens).values(reset).returning();
+      return passwordReset;
+    } catch (error) {
+      console.error('Error in createPasswordReset:', error);
+      throw error;
+    }
+  }
+
+  async getPasswordReset(token: string): Promise<PasswordReset | undefined> {
+    try {
+      const [reset] = await db.select().from(passwordResetTokens).where(eq(passwordResetTokens.token, token));
+      return reset;
+    } catch (error) {
+      console.error('Error in getPasswordReset:', error);
+      throw error;
+    }
+  }
+
+  async deletePasswordReset(token: string): Promise<void> {
+    try {
+      await db.delete(passwordResetTokens).where(eq(passwordResetTokens.token, token));
+    } catch (error) {
+      console.error('Error in deletePasswordReset:', error);
+      throw error;
+    }
+  }
+
+  async markPasswordResetAsUsed(token: string): Promise<void> {
+    try {
+      await db
+        .update(passwordResetTokens)
+        .set({ used: true })
+        .where(eq(passwordResetTokens.token, token));
+    } catch (error) {
+      console.error('Error in markPasswordResetAsUsed:', error);
+      throw error;
+    }
+  }
+
+  async updateUserPassword(userId: number, hashedPassword: string): Promise<User> {
+    try {
+      const [user] = await db
+        .update(users)
+        .set({ password: hashedPassword })
+        .where(eq(users.id, userId))
+        .returning();
+      return user;
+    } catch (error) {
+      console.error('Error in updateUserPassword:', error);
       throw error;
     }
   }

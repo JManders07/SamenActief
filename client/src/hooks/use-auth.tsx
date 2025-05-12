@@ -21,6 +21,7 @@ interface AuthContextType {
   login: (data: LoginData) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -88,6 +89,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  const resetPasswordMutation = useMutation({
+    mutationFn: async (email: string) => {
+      const res = await apiRequest("POST", "/api/reset-password", { email });
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Reset link verstuurd",
+        description: "Controleer uw e-mail voor de reset link.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Reset link versturen mislukt",
+        description: "Controleer of het e-mailadres correct is.",
+        variant: "destructive",
+      });
+    },
+  });
+
   return (
     <AuthContext.Provider
       value={{
@@ -97,6 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login: loginMutation.mutateAsync,
         register: registerMutation.mutateAsync,
         logout: logoutMutation.mutateAsync,
+        resetPassword: resetPasswordMutation.mutateAsync,
       }}
     >
       {children}

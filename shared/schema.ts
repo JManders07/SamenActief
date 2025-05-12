@@ -99,11 +99,20 @@ export const carpoolPassengers = pgTable("carpool_passengers", {
   passengerId: integer("passenger_id").notNull(),
 });
 
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  used: boolean("used").notNull().default(false),
+});
+
 // Insert schemas
 export const insertReminderSchema = createInsertSchema(reminders);
 export const insertWaitlistSchema = createInsertSchema(waitlist);
 export const insertCarpoolSchema = createInsertSchema(carpools);
 export const insertCarpoolPassengerSchema = createInsertSchema(carpoolPassengers);
+export const insertPasswordResetSchema = createInsertSchema(passwordResetTokens);
 
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
@@ -141,6 +150,7 @@ export type InsertReminder = z.infer<typeof insertReminderSchema>;
 export type InsertWaitlist = z.infer<typeof insertWaitlistSchema>;
 export type InsertCarpool = z.infer<typeof insertCarpoolSchema>;
 export type InsertCarpoolPassenger = z.infer<typeof insertCarpoolPassengerSchema>;
+export type InsertPasswordReset = z.infer<typeof insertPasswordResetSchema>;
 
 export type User = typeof users.$inferSelect;
 export type Center = typeof centers.$inferSelect;
@@ -150,6 +160,7 @@ export type Reminder = typeof reminders.$inferSelect;
 export type Waitlist = typeof waitlist.$inferSelect;
 export type Carpool = typeof carpools.$inferSelect;
 export type CarpoolPassenger = typeof carpoolPassengers.$inferSelect;
+export type PasswordReset = typeof passwordResetTokens.$inferSelect;
 
 // Add type for activity images
 export type ActivityImage = typeof activityImages.$inferSelect;

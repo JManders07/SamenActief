@@ -20,6 +20,7 @@ import {
   FormMessage,
   FormDescription,
 } from "@/components/ui/form";
+import { useAuth } from "@/hooks/use-auth";
 
 const resetPasswordSchema = z.object({
   email: z.string()
@@ -31,6 +32,7 @@ type ResetPasswordForm = z.infer<typeof resetPasswordSchema>;
 
 export default function ResetPasswordPage() {
   const [, setLocation] = useLocation();
+  const { resetPassword } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<ResetPasswordForm>({
@@ -43,10 +45,7 @@ export default function ResetPasswordPage() {
   const onSubmit = async (data: ResetPasswordForm) => {
     setIsSubmitting(true);
     try {
-      // Hier komt later de logica voor het resetten van het wachtwoord
-      console.log("Reset password for:", data.email);
-      // Voor nu alleen een timeout simuleren
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await resetPassword(data.email);
       setLocation("/auth");
     } catch (error) {
       console.error("Reset password failed:", error);
