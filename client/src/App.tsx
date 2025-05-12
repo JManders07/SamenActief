@@ -18,6 +18,7 @@ import Contact from "@/pages/contact";
 import About from "@/pages/about";
 import Navigation from "@/components/navigation";
 import ResetPasswordPage from "@/pages/reset-password";
+import ResetPassword from '@/pages/ResetPassword';
 
 function Router() {
   return (
@@ -29,6 +30,7 @@ function Router() {
       <Route path="/profile" component={Profile} />
       <Route path="/auth" component={Auth} />
       <Route path="/reset-password" component={ResetPasswordPage} />
+      <Route path="/reset-password/:token" component={ResetPassword} />
       <Route path="/center-admin" component={CenterAdmin} />
       <Route path="/activity-stats" component={ActivityStats} />
       <Route path="/help" component={Help} />
