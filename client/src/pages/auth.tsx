@@ -165,6 +165,15 @@ export default function AuthPage() {
                       >
                         {loginForm.formState.isSubmitting ? "Bezig..." : "Inloggen"}
                       </Button>
+                      <div className="text-center mt-4">
+                        <Button
+                          variant="link"
+                          onClick={() => setLocation("/reset-password")}
+                          className="text-sm text-muted-foreground hover:text-primary"
+                        >
+                          Wachtwoord vergeten?
+                        </Button>
+                      </div>
                     </form>
                   </Form>
                 </TabsContent>

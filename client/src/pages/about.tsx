@@ -35,7 +35,7 @@ export default function AboutPage() {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <p>Ontwikkelaar van SamenActief en gedreven om mensen samen te brengen</p>
+              <p>Ontwikkelaar van SamenActief en gedreven om mensen samen te brengen.</p>
             </CardContent>
           </Card>
 
@@ -52,7 +52,7 @@ export default function AboutPage() {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <p>Ontwikkelaar van SamenActief</p>
+              <p>Ontwikkelaar van SamenActief.</p>
             </CardContent>
           </Card>
 
