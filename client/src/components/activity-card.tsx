@@ -48,11 +48,14 @@ export function ActivityCard({
     ...(activityImages?.map(img => img.imageUrl) || [])
   ].filter(Boolean);
 
+  console.log('Activity images for', activity.name, ':', activityImages);
+  console.log('All images for', activity.name, ':', allImages);
+
   return (
     <Card className="overflow-hidden">
       <div className="relative h-48 overflow-hidden rounded-t-lg">
         {allImages.length > 1 ? (
-          <ImageCarousel images={allImages} />
+          <ImageCarousel images={allImages} className="h-full" />
         ) : (
           <img
             src={activity.imageUrl}
