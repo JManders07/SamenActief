@@ -2,10 +2,12 @@ import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { formatDistanceToNow, format } from "date-fns";
-import type { Activity } from "@shared/schema";
+import type { Activity, ActivityImage } from "@shared/schema";
 import { Calendar, Users, Car, Package, Building2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { ImageCarousel } from "@/components/image-carousel";
 
 interface ActivityCardProps {
   activity: Activity;
@@ -34,17 +36,30 @@ export function ActivityCard({
   const date = new Date(activity.date);
   const isAdmin = user && user.role === "center_admin";
 
-  // Use default image if no image URL is provided
-  const imageUrl = activity.imageUrl || "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
+  // Haal extra afbeeldingen op
+  const { data: activityImages } = useQuery<ActivityImage[]>({
+    queryKey: [`/api/activities/${activity.id}/images`],
+    enabled: !!activity.id,
+  });
+
+  // Combineer hoofdfoto met extra afbeeldingen
+  const allImages = [
+    activity.imageUrl,
+    ...(activityImages?.map(img => img.imageUrl) || [])
+  ].filter(Boolean);
 
   return (
     <Card className="overflow-hidden">
       <div className="relative h-48 overflow-hidden rounded-t-lg">
-        <img
-          src={imageUrl}
-          alt={activity.name}
-          className="h-full w-full object-cover"
-        />
+        {allImages.length > 1 ? (
+          <ImageCarousel images={allImages} />
+        ) : (
+          <img
+            src={activity.imageUrl}
+            alt={activity.name}
+            className="h-full w-full object-cover"
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         <div className="absolute bottom-0 left-0 p-4">
           <h3 className="text-xl font-bold text-white">{activity.name}</h3>

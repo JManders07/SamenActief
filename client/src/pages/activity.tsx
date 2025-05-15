@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import type { Activity, User } from "@shared/schema";
+import type { Activity, User, ActivityImage } from "@shared/schema";
 import { Calendar, Users, Package, Building2 } from "lucide-react";
 import { format } from "date-fns";
+import { ImageCarousel } from "@/components/image-carousel";
 
 type WaitlistUser = User & { position: number };
 
@@ -18,7 +19,13 @@ export default function ActivityPage() {
   const { user } = useAuth();
 
   const { data: activity, isLoading: isLoadingActivity } = useQuery<Activity>({
-    queryKey: [`/api/activities/${activityId}`],
+    queryKey: [`/api/activities/${id}`],
+    enabled: !!id,
+  });
+
+  const { data: activityImages, isLoading: isLoadingImages } = useQuery<ActivityImage[]>({
+    queryKey: [`/api/activities/${id}/images`],
+    enabled: !!id,
   });
 
   const { data: attendees, isLoading: isLoadingAttendees } = useQuery<User[]>({
@@ -128,7 +135,7 @@ export default function ActivityPage() {
     },
   });
 
-  if (isLoadingActivity || isLoadingAttendees || isLoadingWaitlist) {
+  if (isLoadingActivity || isLoadingAttendees || isLoadingWaitlist || isLoadingImages) {
     return (
       <div className="space-y-8">
         <div className="h-64 animate-pulse rounded-lg bg-muted" />
@@ -145,14 +152,24 @@ export default function ActivityPage() {
 
   const date = new Date(activity.date);
 
+  // Combineer hoofdfoto met extra afbeeldingen
+  const allImages = [
+    activity.imageUrl,
+    ...(activityImages?.map(img => img.imageUrl) || [])
+  ].filter(Boolean);
+
   return (
     <div className="space-y-8">
       <div className="relative h-64 overflow-hidden rounded-lg">
-        <img
-          src={activity.imageUrl}
-          alt={activity.name}
-          className="h-full w-full object-cover"
-        />
+        {allImages.length > 1 ? (
+          <ImageCarousel images={allImages} />
+        ) : (
+          <img
+            src={activity.imageUrl}
+            alt={activity.name}
+            className="h-full w-full object-cover"
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         <div className="absolute bottom-0 left-0 p-8">
           <h1 className="text-4xl font-bold text-white">{activity.name}</h1>

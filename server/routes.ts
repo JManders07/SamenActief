@@ -859,5 +859,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/activities/:id/images", async (req, res) => {
+    const activityId = parseInt(req.params.id);
+    if (isNaN(activityId)) {
+      return res.status(400).json({ message: "Invalid activity ID" });
+    }
+
+    try {
+      const images = await storage.getActivityImages(activityId);
+      res.json(images);
+    } catch (error) {
+      console.error('Error fetching activity images:', error);
+      res.status(500).json({ message: "Er is een fout opgetreden bij het ophalen van de afbeeldingen" });
+    }
+  });
+
   return httpServer;
 }
