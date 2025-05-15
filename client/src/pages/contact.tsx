@@ -196,7 +196,7 @@ export default function ContactPage() {
                   <Mail className="w-6 h-6 text-gray-900 mt-1" />
                   <div>
                     <h3 className="font-semibold">E-mail</h3>
-                    <p className="text-gray-600">info@samenactief.nl</p>
+                    <p className="text-gray-600">info@samenactiefonline.nl</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-4">
@@ -215,25 +215,6 @@ export default function ContactPage() {
                       5612 MA Eindhoven
                     </p>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Opening Hours */}
-            <div className="bg-white p-8 rounded-2xl shadow-lg">
-              <h2 className="text-3xl font-bold mb-6">Openingstijden</h2>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Maandag - Vrijdag</span>
-                  <span className="font-medium">09:00 - 17:00</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Zaterdag</span>
-                  <span className="font-medium">10:00 - 16:00</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Zondag</span>
-                  <span className="font-medium">Gesloten</span>
                 </div>
               </div>
             </div>
