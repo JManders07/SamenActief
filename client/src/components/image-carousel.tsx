@@ -29,18 +29,18 @@ export function ImageCarousel({ images, className = "" }: ImageCarouselProps) {
   }
 
   return (
-    <div className={`relative h-full ${className}`}>
-      <div className="overflow-hidden h-full" ref={emblaRef}>
+    <div className={`relative h-full w-full ${className}`}>
+      <div className="overflow-hidden h-full w-full" ref={emblaRef}>
         <div className="flex h-full">
           {images.map((image, index) => (
-            <div key={index} className="relative flex-[0_0_100%] h-full">
+            <div key={index} className="relative flex-[0_0_100%] h-full w-full">
               <img
                 src={image}
                 alt={`Slide ${index + 1}`}
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   console.error('Error loading image:', image, e);
-                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.src = "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
                 }}
               />
             </div>
@@ -53,7 +53,7 @@ export function ImageCarousel({ images, className = "" }: ImageCarouselProps) {
           <Button
             variant="outline"
             size="icon"
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full z-10"
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full z-20"
             onClick={scrollPrev}
           >
             <ChevronLeft className="h-4 w-4" />
@@ -61,7 +61,7 @@ export function ImageCarousel({ images, className = "" }: ImageCarouselProps) {
           <Button
             variant="outline"
             size="icon"
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full z-10"
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full z-20"
             onClick={scrollNext}
           >
             <ChevronRight className="h-4 w-4" />

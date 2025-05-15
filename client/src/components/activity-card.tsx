@@ -55,13 +55,21 @@ export function ActivityCard({
     <Card className="overflow-hidden">
       <div className="relative h-48 overflow-hidden rounded-t-lg">
         {allImages.length > 1 ? (
-          <ImageCarousel images={allImages} className="h-full" />
+          <div className="h-full w-full">
+            <ImageCarousel images={allImages} className="h-full w-full" />
+          </div>
         ) : (
-          <img
-            src={activity.imageUrl}
-            alt={activity.name}
-            className="h-full w-full object-cover"
-          />
+          <div className="h-full w-full">
+            <img
+              src={activity.imageUrl}
+              alt={activity.name}
+              className="h-full w-full object-cover"
+              onError={(e) => {
+                console.error('Error loading image:', activity.imageUrl, e);
+                e.currentTarget.src = "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
+              }}
+            />
+          </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         <div className="absolute bottom-0 left-0 p-4">
