@@ -19,6 +19,7 @@ import About from "@/pages/about";
 import Navigation from "@/components/navigation";
 import ResetPasswordPage from "@/pages/reset-password";
 import ResetPassword from '@/pages/ResetPassword';
+import TestRegistration from '@/pages/test-registration';
 
 function Router() {
   return (
@@ -29,6 +30,7 @@ function Router() {
       <Route path="/activities/:id" component={Activity} />
       <Route path="/profile" component={Profile} />
       <Route path="/auth" component={Auth} />
+      <Route path="/test" component={TestRegistration} />
       <Route path="/reset-password" component={ResetPasswordPage} />
       <Route path="/reset-password/:token" component={ResetPassword} />
       <Route path="/center-admin" component={CenterAdmin} />
