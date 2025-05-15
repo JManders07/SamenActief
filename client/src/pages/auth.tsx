@@ -83,19 +83,31 @@ export default function AuthPage() {
 
   const onLogin = async (data: LoginForm) => {
     try {
-      await login(data);
+      const user = await login(data);
       setLocation("/home");
     } catch (error) {
       console.error("Login failed:", error);
+      if (error instanceof Error) {
+        loginForm.setError("root", {
+          type: "manual",
+          message: error.message || "Er is een fout opgetreden bij het inloggen. Probeer het later opnieuw."
+        });
+      }
     }
   };
 
   const onRegister = async (data: RegisterForm) => {
     try {
-      await register(data);
+      const user = await register(data);
       setLocation("/home");
     } catch (error) {
       console.error("Registration failed:", error);
+      if (error instanceof Error) {
+        registerForm.setError("root", {
+          type: "manual",
+          message: error.message || "Er is een fout opgetreden bij het registreren. Probeer het later opnieuw."
+        });
+      }
     }
   };
 
@@ -325,6 +337,11 @@ export default function AuthPage() {
                       onSubmit={registerForm.handleSubmit((data) => onRegister({ ...data, role: 'center_admin' }))}
                       className="space-y-4"
                     >
+                      {registerForm.formState.errors.root && (
+                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                          <span className="block sm:inline">{registerForm.formState.errors.root.message}</span>
+                        </div>
+                      )}
                       <FormField
                         control={registerForm.control}
                         name="displayName"
@@ -411,6 +428,23 @@ export default function AuthPage() {
                           </FormItem>
                         )}
                       />
+
+                      <FormField
+                        control={registerForm.control}
+                        name="acceptedTerms"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <TermsAndConditions
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
                       <Button
                         type="submit"
                         className="w-full"

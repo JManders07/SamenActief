@@ -649,6 +649,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update the register route to properly create a center for admin users
   app.post("/api/register", async (req, res, next) => {
     try {
+      // Valideer verplichte velden
+      const requiredFields = ['username', 'password', 'displayName', 'phone', 'village', 'neighborhood', 'role'];
+      const missingFields = requiredFields.filter(field => !req.body[field]);
+      
+      if (missingFields.length > 0) {
+        return res.status(400).json({ 
+          message: `De volgende velden zijn verplicht: ${missingFields.join(', ')}` 
+        });
+      }
+
       const existingUser = await storage.getUserByUsername(req.body.username);
       if (existingUser) {
         return res.status(400).json({ message: "Gebruikersnaam is al in gebruik" });
@@ -666,25 +676,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Als dit een buurthuis beheerder is, maak dan ook een buurthuis aan
       if (user.role === 'center_admin') {
-        const center = await storage.createCenter({
-          name: user.displayName,
-          address: `${user.neighborhood}, ${user.village}`,
-          description: `Buurthuis ${user.displayName} in ${user.village}`,
-          imageUrl: "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-          adminId: user.id,
-          village: user.village
-        });
+        try {
+          const center = await storage.createCenter({
+            name: user.displayName,
+            address: `${user.neighborhood}, ${user.village}`,
+            description: `Buurthuis ${user.displayName} in ${user.village}`,
+            imageUrl: "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+            adminId: user.id,
+            village: user.village
+          });
 
-        console.log('Created center:', center);
+          console.log('Created center:', center);
+        } catch (centerError) {
+          console.error('Error creating center:', centerError);
+          // Als het aanmaken van het buurthuis mislukt, verwijder dan de gebruiker
+          await storage.deleteUserData(user.id);
+          return res.status(500).json({ 
+            message: "Er is een fout opgetreden bij het aanmaken van het buurthuis. Probeer het later opnieuw." 
+          });
+        }
       }
 
       req.login(user, (err) => {
-        if (err) return next(err);
+        if (err) {
+          console.error('Login error after registration:', err);
+          return res.status(500).json({ 
+            message: "Er is een fout opgetreden bij het inloggen. Probeer het later opnieuw." 
+          });
+        }
         res.status(201).json(user);
       });
     } catch (err) {
       console.error('Error in register route:', err);
-      next(err);
+      res.status(500).json({ 
+        message: "Er is een fout opgetreden bij het registreren. Probeer het later opnieuw." 
+      });
     }
   });
 

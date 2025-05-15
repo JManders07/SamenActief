@@ -18,8 +18,8 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   error: Error | null;
-  login: (data: LoginData) => Promise<void>;
-  register: (data: RegisterData) => Promise<void>;
+  login: (data: LoginData) => Promise<User>;
+  register: (data: RegisterData) => Promise<User>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
 }
@@ -58,6 +58,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterData) => {
       const res = await apiRequest("POST", "/api/register", data);
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Er is een fout opgetreden bij het registreren");
+      }
       return res.json();
     },
     onSuccess: (user: User) => {
@@ -70,7 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onError: (error: Error) => {
       toast({
         title: "Registratie mislukt",
-        description: "Deze gebruikersnaam is mogelijk al in gebruik.",
+        description: error.message || "Er is een fout opgetreden bij het registreren",
         variant: "destructive",
       });
     },
