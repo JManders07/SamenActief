@@ -97,72 +97,7 @@ export default function HelpPage() {
         </CardContent>
       </Card>
 
-      <Card className="border-2">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-3xl">
-            <Euro className="h-8 w-8 text-primary" /> Kosten & Lidmaatschap
-          </CardTitle>
-          <CardDescription className="text-xl">
-            Informatie over prijzen en betalingen
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Accordion type="single" collapsible className="w-full space-y-4">
-            <AccordionItem value="kosten-1" className="border-2 rounded-lg">
-              <AccordionTrigger className="text-2xl p-4">
-                Wat kost deelname aan activiteiten?
-              </AccordionTrigger>
-              <AccordionContent className="p-6">
-                <div className="space-y-6">
-                  <p className="text-xl">De kosten verschillen per activiteit:</p>
-                  <ul className="list-disc pl-8 space-y-4 text-xl">
-                    <li>Gratis activiteiten: kennismaking en sociale bijeenkomsten</li>
-                    <li>Betaalde activiteiten: workshops, cursussen en speciale evenementen</li>
-                    <li>Lidmaatschap: €5 per maand voor onbeperkt toegang tot alle basis-activiteiten</li>
-                  </ul>
-                  <p className="text-xl mt-4">Bij elke activiteit staat duidelijk aangegeven wat de kosten zijn.</p>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="kosten-2" className="border-2 rounded-lg">
-              <AccordionTrigger className="text-2xl p-4">
-                Hoe werkt betalen?
-              </AccordionTrigger>
-              <AccordionContent className="p-6">
-                <div className="space-y-6">
-                  <p className="text-xl">U kunt op verschillende manieren betalen:</p>
-                  <ul className="list-disc pl-8 space-y-4 text-xl">
-                    <li>Direct online via iDEAL of creditcard</li>
-                    <li>Contant bij het buurthuis (alleen voor losse activiteiten)</li>
-                    <li>Automatische incasso voor het maandelijkse lidmaatschap</li>
-                  </ul>
-                  <p className="text-xl mt-4">U ontvangt altijd een bevestiging van uw betaling per e-mail.</p>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="kosten-3" className="border-2 rounded-lg">
-              <AccordionTrigger className="text-2xl p-4">
-                Wat zijn de voordelen van lidmaatschap?
-              </AccordionTrigger>
-              <AccordionContent className="p-6">
-                <div className="space-y-6">
-                  <p className="text-xl">Als lid krijgt u extra voordelen:</p>
-                  <ul className="list-disc pl-8 space-y-4 text-xl">
-                    <li>Gratis deelname aan alle basis-activiteiten</li>
-                    <li>Korting op speciale workshops en evenementen</li>
-                    <li>Voorrang bij populaire activiteiten</li>
-                    <li>Maandelijkse nieuwsbrief met exclusieve activiteiten</li>
-                  </ul>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </CardContent>
-      </Card>
-
-      <Card className="border-2">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-3xl">
             <Settings className="h-8 w-8 text-primary" /> Snelkoppelingen
