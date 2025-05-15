@@ -84,7 +84,7 @@ export default function Index() {
                 className="w-full h-full object-cover rounded-lg"
               />
             </div>
-            <h3 className="text-2xl font-bold mb-2">Activiteiten</h3>
+            <Link href="/home"><h3 className="text-2xl font-bold mb-2 hover:text-blue-600 cursor-pointer">Activiteiten</h3></Link>
             <p className="text-gray-600">
               Ontdek een breed scala aan activiteiten in jouw buurt, van sport tot cultuur.
             </p>
@@ -101,7 +101,7 @@ export default function Index() {
                 }}
               />
             </div>
-            <h3 className="text-2xl font-bold mb-2">Buurthuizen</h3>
+            <Link href="/home"><h3 className="text-2xl font-bold mb-2 hover:text-blue-600 cursor-pointer">Buurthuizen</h3></Link>
             <p className="text-gray-600">
               Vind buurthuizen bij jou in de buurt en maak kennis met je buren.
             </p>
@@ -114,7 +114,7 @@ export default function Index() {
                 className="w-full h-full object-cover rounded-lg"
               />
             </div>
-            <h3 className="text-2xl font-bold mb-2">Samen Doen</h3>
+            <Link href="/home"><h3 className="text-2xl font-bold mb-2 hover:text-blue-600 cursor-pointer">Samen Doen</h3></Link>
             <p className="text-gray-600">
               Sluit je aan bij bestaande activiteiten of start zelf iets nieuws.
             </p>
