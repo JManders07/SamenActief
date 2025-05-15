@@ -73,7 +73,7 @@ export function ActivityCard({
               <Button
                 size="sm"
                 variant="secondary"
-                className="bg-white/90 hover:bg-white"
+                className="bg-white/90 hover:bg-white text-black"
                 onClick={(e) => {
                   e.stopPropagation();
                   onEditClick(activity);
@@ -86,7 +86,7 @@ export function ActivityCard({
               <Button
                 size="sm"
                 variant="destructive"
-                className="bg-white/90 hover:bg-white"
+                className="bg-red-500 hover:bg-red-600 text-white"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete();
