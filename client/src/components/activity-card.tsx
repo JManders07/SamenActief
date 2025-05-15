@@ -13,8 +13,8 @@ interface ActivityCardProps {
   activity: Activity;
   onRegister?: () => void;
   isRegistered?: boolean;
-  onEdit?: (activity: Activity) => void;
   onEditClick?: (activity: Activity) => void;
+  onDelete?: () => void;
   waitlistPosition?: number;
   onWaitlist?: boolean;
   onJoinWaitlist?: () => void;
@@ -24,13 +24,13 @@ export function ActivityCard({
   activity, 
   onRegister, 
   isRegistered, 
-  onEdit, 
   onEditClick,
+  onDelete,
   waitlistPosition,
   onWaitlist,
   onJoinWaitlist
 }: ActivityCardProps) {
-  const { isAuthenticated, user } = useAuth();
+  const { user } = useAuth();
   const [, setLocation] = useLocation();
   const isFull = activity.capacity <= 0;
   const date = new Date(activity.date);
@@ -67,20 +67,34 @@ export function ActivityCard({
             {format(new Date(activity.date), "PPP 'om' p")}
           </p>
         </div>
-        {(onEdit || onEditClick) && user?.role === 'center_admin' && (
-          <div className="absolute top-2 right-2">
-            <Button
-              size="sm"
-              variant="secondary"
-              className="bg-white/90 hover:bg-white"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (onEdit) onEdit(activity);
-                if (onEditClick) onEditClick(activity);
-              }}
-            >
-              Bewerken
-            </Button>
+        {isAdmin && (onEditClick || onDelete) && (
+          <div className="absolute top-2 right-2 flex gap-2">
+            {onEditClick && (
+              <Button
+                size="sm"
+                variant="secondary"
+                className="bg-white/90 hover:bg-white"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEditClick(activity);
+                }}
+              >
+                Bewerken
+              </Button>
+            )}
+            {onDelete && (
+              <Button
+                size="sm"
+                variant="destructive"
+                className="bg-white/90 hover:bg-white"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+              >
+                Verwijderen
+              </Button>
+            )}
           </div>
         )}
       </div>
