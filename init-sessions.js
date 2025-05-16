@@ -1,8 +1,23 @@
 import { Pool } from '@neondatabase/serverless';
+import { config } from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Laad .env bestand
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+config({ path: path.resolve(__dirname, ".env") });
 
 // Database connection
+const DATABASE_URL = process.env.DATABASE_URL;
+
+// Controleer of de DATABASE_URL is ingesteld
+if (!DATABASE_URL) {
+  throw new Error("DATABASE_URL moet worden ingesteld in het .env bestand");
+}
+
 const pool = new Pool({
-  connectionString: "postgresql://neondb_owner:npg_hGLq6WZ1cRAb@ep-nameless-leaf-a9z0109h-pooler.gwc.azure.neon.tech/neondb?sslmode=require",
+  connectionString: DATABASE_URL,
 });
 
 async function createSessionsTable() {

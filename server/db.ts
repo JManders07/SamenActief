@@ -14,12 +14,12 @@ config({ path: path.resolve(__dirname, "..", ".env") });
 // Configure WebSocket for Neon serverless
 neonConfig.webSocketConstructor = ws;
 
-// Gebruik hardcoded connection string als fallback
-const DATABASE_URL = process.env.DATABASE_URL || "postgresql://neondb_owner:npg_hGLq6WZ1cRAb@ep-nameless-leaf-a9z0109h-pooler.gwc.azure.neon.tech/neondb?sslmode=require";
+// Haal database URL uit environment variables
+const DATABASE_URL = process.env.DATABASE_URL;
 
 if (!DATABASE_URL) {
   throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
+    "DATABASE_URL moet worden ingesteld in het .env bestand",
   );
 }
 
