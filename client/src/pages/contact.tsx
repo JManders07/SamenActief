@@ -157,7 +157,7 @@ export default function ContactPage() {
               </div>
               <div className="flex justify-center">
                 <ReCAPTCHA
-                  sitekey="6LdemhorAAAAAImRDOrBSMqG9jdbAdnKKg0xMBDc" // Echte site key
+                  sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6LdemhorAAAAAImRDOrBSMqG9jdbAdnKKg0xMBDc"} // Gebruik environment variabele
                   onChange={(value) => setRecaptchaValue(value)}
                 />
               </div>
