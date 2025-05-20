@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { formatDistanceToNow, format } from "date-fns";
+import { nl } from "date-fns/locale";
 import type { Activity, ActivityImage } from "@shared/schema";
 import { Calendar, Users, Car, Package, Building2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
@@ -64,7 +65,7 @@ export function ActivityCard({
         <div className="absolute bottom-0 left-0 p-4">
           <h3 className="text-xl font-bold text-white">{activity.name}</h3>
           <p className="text-sm text-white/90">
-            {format(new Date(activity.date), "PPP 'om' p")}
+            {format(new Date(activity.date), "PPP 'om' p", { locale: nl })}
           </p>
         </div>
         {isAdmin && (onEditClick || onDelete) && (
@@ -102,7 +103,7 @@ export function ActivityCard({
         <div className="flex items-center space-x-2 text-lg text-muted-foreground">
           <Calendar className="h-5 w-5" />
           <time dateTime={date.toISOString()}>
-            {format(date, "EEEE, MMMM d 'at' h:mm a")}
+            {format(date, "EEEE, MMMM d 'om' HH:mm 'uur'", { locale: nl })}
           </time>
         </div>
 
