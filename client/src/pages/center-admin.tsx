@@ -27,6 +27,7 @@ export default function CenterAdminPage() {
   const { toast } = useToast();
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [selectedCenterImage, setSelectedCenterImage] = useState<File | null>(null);
 
   const { data: center, isLoading: isLoadingCenter } = useQuery<Center>({
     queryKey: [`/api/centers/my-center`],
@@ -86,6 +87,32 @@ export default function CenterAdminPage() {
     onError: (error: Error) => {
       toast({
         title: "Verwijderen mislukt",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateCenter = useMutation({
+    mutationFn: async (data: Partial<Center>) => {
+      if (!center?.id) return;
+      const res = await apiRequest("PUT", `/api/centers/${center.id}`, data);
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Er is een fout opgetreden bij het bijwerken van het buurthuis");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/centers/my-center`] });
+      toast({
+        title: "Buurthuis bijgewerkt",
+        description: "Het buurthuis is succesvol bijgewerkt.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Bijwerken mislukt",
         description: error.message,
         variant: "destructive",
       });
@@ -172,34 +199,37 @@ export default function CenterAdminPage() {
 
   const handleSubmitCenter = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!center?.id) return;
-
     const formData = new FormData(e.currentTarget);
-    const data = {
-      name: formData.get('name'),
-      description: formData.get('description'),
-      address: formData.get('address'),
-      imageUrl: formData.get('imageUrl') || center.imageUrl
-    };
-
+    
     try {
-      const response = await fetch(`/api/centers/${center.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
+      let imageUrl = center?.imageUrl;
 
-      if (!response.ok) {
-        throw new Error('Kon buurthuis niet bijwerken');
+      // Upload nieuwe afbeelding als er een is geselecteerd
+      if (selectedCenterImage) {
+        const imageFormData = new FormData();
+        imageFormData.append('file', selectedCenterImage);
+
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: imageFormData
+        });
+
+        if (!response.ok) throw new Error('Kon afbeelding niet uploaden');
+        const data = await response.json();
+        imageUrl = data.url;
       }
 
-      queryClient.invalidateQueries({ queryKey: [`/api/centers/my-center`] });
-      toast({ title: "Buurthuis bijgewerkt" });
+      updateCenter.mutate({
+        name: formData.get('name') as string,
+        description: formData.get('description') as string,
+        address: formData.get('address') as string,
+        imageUrl: imageUrl
+      });
     } catch (error) {
-      toast({ 
-        title: "Fout",
-        description: "Kon buurthuis niet bijwerken",
-        variant: "destructive"
+      toast({
+        title: "Bijwerken mislukt",
+        description: error instanceof Error ? error.message : "Er is een fout opgetreden",
+        variant: "destructive",
       });
     }
   };
@@ -227,40 +257,40 @@ export default function CenterAdminPage() {
           <div>
             <label>Naam</label>
             <Input 
-              name="name"
-              defaultValue={center?.name}
+              name="name" 
               required 
-            />
-          </div>
-
-          <div>
-            <label>Adres</label>
-            <Input 
-              name="address"
-              defaultValue={center?.address}
-              required 
+              defaultValue={center?.name || ""}
             />
           </div>
 
           <div>
             <label>Beschrijving</label>
             <Textarea 
-              name="description"
-              defaultValue={center?.description}
+              name="description" 
               required 
+              defaultValue={center?.description || ""}
             />
           </div>
 
           <div>
-            <label>Afbeelding URL</label>
+            <label>Adres</label>
             <Input 
-              name="imageUrl"
-              defaultValue={center?.imageUrl}
+              name="address" 
+              required 
+              defaultValue={center?.address || ""}
             />
           </div>
 
-          <Button type="submit" className="w-full">
-            Wijzigingen opslaan
+          <div>
+            <label>Afbeelding</label>
+            <ImageUpload
+              onImagesSelected={(files) => setSelectedCenterImage(files[0])}
+              preview={center?.imageUrl ? [center.imageUrl] : []}
+            />
+          </div>
+
+          <Button type="submit" disabled={updateCenter.isPending}>
+            {updateCenter.isPending ? "Bezig..." : "Buurthuis bijwerken"}
           </Button>
         </form>
       </div>
