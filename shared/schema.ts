@@ -35,8 +35,9 @@ export const users = pgTable("users", {
   phone: text("phone").notNull(),
   village: text("village").notNull(),
   neighborhood: text("neighborhood").notNull(),
+  role: text("role", { enum: ["user", "center_admin"] }).notNull().default("user"),
   anonymousParticipation: boolean("anonymous_participation").notNull().default(false),
-  role: roleEnum("role").notNull().default('user'),
+  hasSeenOnboarding: boolean("has_seen_onboarding").notNull().default(false),
 });
 
 export const centers = pgTable("centers", {

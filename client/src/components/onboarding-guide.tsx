@@ -3,13 +3,32 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
 import { Building2, Calendar, User, Eye, X } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
 
 export function OnboardingGuide() {
   const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [showGuide, setShowGuide] = useState(true);
 
-  if (!showGuide) return null;
+  const updateOnboardingStatus = useMutation({
+    mutationFn: async () => {
+      if (!user?.id) return;
+      const res = await apiRequest("PATCH", `/api/users/${user.id}`, {
+        hasSeenOnboarding: true
+      });
+      if (!res.ok) {
+        throw new Error("Kon onboarding status niet bijwerken");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${user?.id}`] });
+    }
+  });
+
+  if (!showGuide || !user || user.hasSeenOnboarding) return null;
 
   const steps = [
     {
@@ -39,6 +58,11 @@ export function OnboardingGuide() {
   // Het icoon component toewijzen aan een variabele
   const IconComponent = currentStepData.icon;
 
+  const handleClose = () => {
+    setShowGuide(false);
+    updateOnboardingStatus.mutate();
+  };
+
   return (
     <Card className="mb-8">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -46,7 +70,7 @@ export function OnboardingGuide() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setShowGuide(false)}
+          onClick={handleClose}
           aria-label="Uitleg sluiten"
         >
           <X className="h-6 w-6" />
@@ -82,7 +106,7 @@ export function OnboardingGuide() {
             </Button>
           ) : (
             <Button
-              onClick={() => setShowGuide(false)}
+              onClick={handleClose}
               size="lg"
               className="text-lg px-6"
             >

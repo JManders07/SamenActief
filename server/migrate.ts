@@ -17,7 +17,8 @@ async function migrate() {
         village TEXT NOT NULL,
         neighborhood TEXT NOT NULL,
         anonymous_participation BOOLEAN NOT NULL DEFAULT false,
-        role TEXT NOT NULL DEFAULT 'user'
+        role TEXT NOT NULL DEFAULT 'user',
+        has_seen_onboarding BOOLEAN NOT NULL DEFAULT false
       );
     `);
 
@@ -107,6 +108,12 @@ async function migrate() {
       ALTER TABLE activities 
       ADD COLUMN IF NOT EXISTS materials_needed TEXT,
       ADD COLUMN IF NOT EXISTS facilities_available TEXT;
+    `);
+
+    // Add hasSeenOnboarding column to users table
+    await db.execute(sql`
+      ALTER TABLE users 
+      ADD COLUMN IF NOT EXISTS has_seen_onboarding BOOLEAN NOT NULL DEFAULT false;
     `);
 
     // Create password_reset_tokens table

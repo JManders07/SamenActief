@@ -550,7 +550,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(activities.filter(a => a !== undefined));
   });
 
-  // New route to update user settings
+  // Update user settings
   app.patch("/api/users/:id", async (req, res, next) => {
     try {
       const userId = parseInt(req.params.id);
@@ -567,7 +567,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         displayName,
         phone,
         village,
-        neighborhood
+        neighborhood,
+        hasSeenOnboarding
       } = req.body;
 
       // Maak een object met alleen de ingevulde velden
@@ -591,6 +592,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (neighborhood) {
         updateData.neighborhood = neighborhood;
+      }
+
+      if (hasSeenOnboarding !== undefined) {
+        updateData.hasSeenOnboarding = hasSeenOnboarding;
       }
 
       const user = await storage.updateUser(userId, updateData);
