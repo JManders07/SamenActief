@@ -33,9 +33,17 @@ export function ActivityCard({
 }: ActivityCardProps) {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
-  const isFull = activity.capacity <= 0;
   const date = new Date(activity.date);
   const isAdmin = user && user.role === "center_admin";
+
+  // Haal aantal aanmeldingen op
+  const { data: attendees } = useQuery<number>({
+    queryKey: [`/api/activities/${activity.id}/attendees/count`],
+    enabled: !!activity.id,
+  });
+
+  const availableSpots = activity.capacity - (attendees || 0);
+  const isFull = availableSpots <= 0;
 
   // Haal extra afbeeldingen op
   const { data: activityImages } = useQuery<ActivityImage[]>({
@@ -131,7 +139,7 @@ export function ActivityCard({
         <div className="flex items-center gap-2">
           <Users className="h-5 w-5 text-muted-foreground" />
           <span className="text-sm text-muted-foreground">
-            {isFull ? "Vol" : `Nog ${activity.capacity} plekken beschikbaar`}
+            {isFull ? "Vol" : `Nog ${availableSpots} plek${availableSpots === 1 ? '' : 'ken'} beschikbaar`}
           </span>
         </div>
       </CardContent>
