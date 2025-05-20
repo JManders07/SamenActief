@@ -900,5 +900,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add new endpoint for getting registration count
+  app.get("/api/activities/:id/attendees/count", async (req, res) => {
+    try {
+      const activityId = parseInt(req.params.id);
+      if (isNaN(activityId)) {
+        return res.status(400).json({message: "Invalid activity ID"});
+      }
+      const registrations = await storage.getRegistrations(activityId);
+      res.json(registrations.length);
+    } catch (error) {
+      console.error('Error getting registration count:', error);
+      res.status(500).json({ message: "Er is een fout opgetreden" });
+    }
+  });
+
   return httpServer;
 }
