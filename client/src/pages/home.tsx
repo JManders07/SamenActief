@@ -14,9 +14,12 @@ export default function Home() {
   });
 
   // Filter alleen toekomstige activiteiten
-  const upcomingActivities = activities?.filter(
-    activity => new Date(activity.date) > new Date()
-  ) || [];
+  const upcomingActivities = activities?.filter(activity => {
+    const activityDate = new Date(activity.date);
+    const now = new Date();
+    // Vergelijk alleen de datum (niet de tijd)
+    return activityDate.toDateString() >= now.toDateString();
+  }) || [];
 
   if (isLoadingCenters || isLoadingActivities) {
     return (

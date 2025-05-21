@@ -210,12 +210,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const centerId = req.query.centerId ? parseInt(req.query.centerId as string) : undefined;
 
-      // Validate centerId
-      if (!centerId || isNaN(centerId)) {
-        return res.json([]);
-      }
-
-      // Get activities for the specified center
+      // Get activities for the specified center or all activities if no centerId
       const activities = await storage.getActivities(centerId);
 
       // If no activities found, return empty array instead of null
