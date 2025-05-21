@@ -12,6 +12,10 @@ interface LoginData {
 interface RegisterData extends LoginData {
   displayName: string;
   phone: string;
+  village: string;
+  neighborhood: string;
+  anonymousParticipation: boolean;
+  role?: string;
 }
 
 interface AuthContextType {
