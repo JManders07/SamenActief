@@ -5,16 +5,69 @@ import { setupVite, serveStatic, log } from "./vite";
 import { initializeEmailService } from "./email";
 import path from "path";
 import rateLimit from "express-rate-limit";
+import helmet from "helmet";
+import cors from "cors";
+import dotenv from "dotenv";
+
+// Laad environment variables
+dotenv.config();
 
 const app = express();
+
+// Helmet security headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+    },
+  },
+  hsts: {
+    maxAge: Number(process.env.HSTS_MAX_AGE) || 31536000,
+    includeSubDomains: true,
+    preload: true
+  },
+  crossOriginEmbedderPolicy: true,
+  crossOriginOpenerPolicy: true,
+  crossOriginResourcePolicy: { policy: "same-site" },
+  dnsPrefetchControl: { allow: false },
+  frameguard: { action: "deny" },
+  hidePoweredBy: true,
+  ieNoOpen: true,
+  noSniff: true,
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+  xssFilter: true
+}));
+
+// CORS configuratie
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || "http://localhost:3000").split(",");
+app.use(cors({
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Niet toegestaan door CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
 // Rate limiting configuratie
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minuten
   max: 100, // maximaal 100 requests per IP per windowMs
   message: { message: "Te veel requests van dit IP, probeer het later opnieuw" },
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 // Pas rate limiting toe op alle routes
@@ -33,6 +86,25 @@ const authLimiter = rateLimit({
 app.use("/api/login", authLimiter);
 app.use("/api/register", authLimiter);
 app.use("/api/reset-password", authLimiter);
+
+// Verbeterde error handling middleware
+const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
+  console.error("Server error:", err);
+  
+  // Log security-gerelateerde events
+  if (err.status === 401 || err.status === 403) {
+    log(`Security event: ${err.message} from IP ${req.ip}`);
+  }
+
+  // Verberg gevoelige error details in productie
+  const isProduction = process.env.NODE_ENV === "production";
+  const status = err.status || err.statusCode || 500;
+  const message = isProduction 
+    ? "Er is een fout opgetreden" 
+    : err.message || "Internal Server Error";
+
+  res.status(status).json({ message });
+};
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -97,12 +169,7 @@ process.on("unhandledRejection", (reason, promise) => {
     const server = await registerRoutes(app);
     log("Routes registered successfully");
 
-    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-      console.error("Server error:", err);
-      const status = err.status || err.statusCode || 500;
-      const message = err.message || "Internal Server Error";
-      res.status(status).json({ message });
-    });
+    app.use(errorHandler);
 
     if (process.env.NODE_ENV === "development") {
       await setupVite(app, server);
