@@ -21,6 +21,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 interface ActivityWithRegistrations extends Activity {
   registrations?: { id: number }[];
@@ -174,125 +176,136 @@ export default function ActivitiesPage() {
 
   return (
     <CenterAdminLayout>
-      <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold">Activiteiten Beheren</h1>
-          <p className="text-muted-foreground">
-            Beheer de activiteiten van {center?.name}
-          </p>
-        </div>
+      <div className="container mx-auto py-8">
+        <Alert variant="destructive" className="mb-8">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Let op!</AlertTitle>
+          <AlertDescription>
+            Er is momenteel een probleem met het uploaden van afbeeldingen. Ons team werkt hier hard aan om dit op te lossen. 
+            U kunt nog steeds activiteiten aanmaken en bewerken, maar het uploaden van nieuwe afbeeldingen is tijdelijk niet mogelijk.
+          </AlertDescription>
+        </Alert>
 
-        <div className="grid gap-8 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                {editingActivity ? "Activiteit Bewerken" : "Nieuwe Activiteit"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmitActivity} className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium">Naam</label>
-                  <Input 
-                    name="name" 
-                    required 
-                    defaultValue={editingActivity?.name || ""}
-                  />
-                </div>
+        <div className="space-y-8">
+          <div>
+            <h1 className="text-3xl font-bold">Activiteiten Beheren</h1>
+            <p className="text-muted-foreground">
+              Beheer de activiteiten van {center?.name}
+            </p>
+          </div>
 
-                <div>
-                  <label className="text-sm font-medium">Beschrijving</label>
-                  <Textarea 
-                    name="description" 
-                    required 
-                    defaultValue={editingActivity?.description || ""}
-                  />
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium">Datum en tijd</label>
-                  <Input 
-                    name="date" 
-                    type="datetime-local" 
-                    required 
-                    defaultValue={editingActivity?.date ? new Date(editingActivity.date).toISOString().slice(0, 16) : undefined}
-                  />
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium">Capaciteit</label>
-                  <Input 
-                    name="capacity" 
-                    type="number" 
-                    defaultValue={editingActivity?.capacity || "10"} 
-                    required 
-                  />
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium">Benodigde Materialen</label>
-                  <Textarea 
-                    name="materialsNeeded" 
-                    defaultValue={editingActivity?.materialsNeeded || ""}
-                  />
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium">Beschikbare Faciliteiten</label>
-                  <Textarea 
-                    name="facilitiesAvailable" 
-                    defaultValue={editingActivity?.facilitiesAvailable || ""}
-                  />
-                </div>
-
-                {!editingActivity && (
+          <div className="grid gap-8 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  {editingActivity ? "Activiteit Bewerken" : "Nieuwe Activiteit"}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmitActivity} className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium">Foto's</label>
-                    <ImageUpload
-                      onImagesSelected={(files) => setSelectedImages(files)}
-                      onRemoveImage={(index) => {
-                        setSelectedImages(prev => prev.filter((_, i) => i !== index));
-                      }}
+                    <label className="text-sm font-medium">Naam</label>
+                    <Input 
+                      name="name" 
+                      required 
+                      defaultValue={editingActivity?.name || ""}
                     />
                   </div>
-                )}
 
-                <div className="flex gap-4">
-                  <Button type="submit" className="flex-1">
-                    {editingActivity ? "Activiteit bijwerken" : "Activiteit aanmaken"}
-                  </Button>
-                  {editingActivity && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        setEditingActivity(null);
-                        setSelectedImages([]);
-                      }}
-                    >
-                      Annuleren
-                    </Button>
+                  <div>
+                    <label className="text-sm font-medium">Beschrijving</label>
+                    <Textarea 
+                      name="description" 
+                      required 
+                      defaultValue={editingActivity?.description || ""}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium">Datum en tijd</label>
+                    <Input 
+                      name="date" 
+                      type="datetime-local" 
+                      required 
+                      defaultValue={editingActivity?.date ? new Date(editingActivity.date).toISOString().slice(0, 16) : undefined}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium">Capaciteit</label>
+                    <Input 
+                      name="capacity" 
+                      type="number" 
+                      defaultValue={editingActivity?.capacity || "10"} 
+                      required 
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium">Benodigde Materialen</label>
+                    <Textarea 
+                      name="materialsNeeded" 
+                      defaultValue={editingActivity?.materialsNeeded || ""}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium">Beschikbare Faciliteiten</label>
+                    <Textarea 
+                      name="facilitiesAvailable" 
+                      defaultValue={editingActivity?.facilitiesAvailable || ""}
+                    />
+                  </div>
+
+                  {!editingActivity && (
+                    <div>
+                      <label className="text-sm font-medium">Foto's</label>
+                      <ImageUpload
+                        onImagesSelected={(files) => setSelectedImages(files)}
+                        onRemoveImage={(index) => {
+                          setSelectedImages(prev => prev.filter((_, i) => i !== index));
+                        }}
+                      />
+                    </div>
                   )}
-                </div>
-              </form>
-            </CardContent>
-          </Card>
 
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold">Huidige Activiteiten</h2>
-            <div className="grid gap-4">
-              {activities?.map((activity) => (
-                <ActivityCard
-                  key={activity.id}
-                  activity={activity}
-                  onEditClick={() => setEditingActivity(activity)}
-                  onDelete={() => {
-                    if (window.confirm("Weet u zeker dat u deze activiteit wilt verwijderen?")) {
-                      deleteActivity.mutate(activity.id);
-                    }
-                  }}
-                />
-              ))}
+                  <div className="flex gap-4">
+                    <Button type="submit" className="flex-1">
+                      {editingActivity ? "Activiteit bijwerken" : "Activiteit aanmaken"}
+                    </Button>
+                    {editingActivity && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setEditingActivity(null);
+                          setSelectedImages([]);
+                        }}
+                      >
+                        Annuleren
+                      </Button>
+                    )}
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold">Huidige Activiteiten</h2>
+              <div className="grid gap-4">
+                {activities?.map((activity) => (
+                  <ActivityCard
+                    key={activity.id}
+                    activity={activity}
+                    onEditClick={() => setEditingActivity(activity)}
+                    onDelete={() => {
+                      if (window.confirm("Weet u zeker dat u deze activiteit wilt verwijderen?")) {
+                        deleteActivity.mutate(activity.id);
+                      }
+                    }}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>
