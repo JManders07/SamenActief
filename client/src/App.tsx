@@ -11,7 +11,10 @@ import Center from "@/pages/center";
 import Activity from "@/pages/activity";
 import Profile from "@/pages/profile";
 import Auth from "@/pages/auth";
-import CenterAdmin from "@/pages/center-admin";
+import CenterAdminDashboard from "@/pages/center-admin";
+import EditCenterPage from "@/pages/center-admin/center/edit";
+import NewActivityPage from "@/pages/center-admin/activities/new";
+import EditActivityPage from "@/pages/center-admin/activities/[id]/edit";
 import ActivityStats from "@/pages/activity-stats";
 import Help from "@/pages/help";
 import Contact from "@/pages/contact";
@@ -33,7 +36,10 @@ function Router() {
       <Route path="/test" component={TestRegistration} />
       <Route path="/reset-password" component={ResetPasswordPage} />
       <Route path="/reset-password/:token" component={ResetPassword} />
-      <Route path="/center-admin" component={CenterAdmin} />
+      <Route path="/center-admin" component={CenterAdminDashboard} />
+      <Route path="/center-admin/center/edit" component={EditCenterPage} />
+      <Route path="/center-admin/activities/new" component={NewActivityPage} />
+      <Route path="/center-admin/activities/:id/edit" component={EditActivityPage} />
       <Route path="/activity-stats" component={ActivityStats} />
       <Route path="/help" component={Help} />
       <Route path="/contact" component={Contact} />
