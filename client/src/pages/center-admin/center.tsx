@@ -9,6 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Center } from "@shared/schema";
 import { useState } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 export default function CenterPage() {
   const { toast } = useToast();
@@ -91,61 +93,72 @@ export default function CenterPage() {
 
   return (
     <CenterAdminLayout>
-      <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold">Buurthuis Beheren</h1>
-          <p className="text-muted-foreground">
-            Beheer de informatie van uw buurthuis
-          </p>
+      <div className="container mx-auto py-8">
+        <Alert variant="destructive" className="mb-8">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Let op!</AlertTitle>
+          <AlertDescription>
+            Er is momenteel een probleem met het uploaden van afbeeldingen. Ons team werkt hier hard aan om dit op te lossen. 
+            U kunt nog steeds uw buurthuis bewerken, maar het uploaden van nieuwe afbeeldingen is tijdelijk niet mogelijk.
+          </AlertDescription>
+        </Alert>
+
+        <div className="space-y-8">
+          <div>
+            <h1 className="text-3xl font-bold">Buurthuis Beheren</h1>
+            <p className="text-muted-foreground">
+              Beheer de informatie van uw buurthuis
+            </p>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Buurthuis Informatie</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">Naam</label>
+                  <Input 
+                    name="name" 
+                    required 
+                    defaultValue={center?.name || ""}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">Beschrijving</label>
+                  <Textarea 
+                    name="description" 
+                    required 
+                    defaultValue={center?.description || ""}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">Adres</label>
+                  <Input 
+                    name="address" 
+                    required 
+                    defaultValue={center?.address || ""}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">Afbeelding</label>
+                  <ImageUpload
+                    onImagesSelected={(files) => setSelectedCenterImage(files[0])}
+                    preview={center?.imageUrl ? [center.imageUrl] : []}
+                  />
+                </div>
+
+                <Button type="submit" disabled={updateCenter.isPending}>
+                  {updateCenter.isPending ? "Bezig..." : "Buurthuis bijwerken"}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
         </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Buurthuis Informatie</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="text-sm font-medium">Naam</label>
-                <Input 
-                  name="name" 
-                  required 
-                  defaultValue={center?.name || ""}
-                />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium">Beschrijving</label>
-                <Textarea 
-                  name="description" 
-                  required 
-                  defaultValue={center?.description || ""}
-                />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium">Adres</label>
-                <Input 
-                  name="address" 
-                  required 
-                  defaultValue={center?.address || ""}
-                />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium">Afbeelding</label>
-                <ImageUpload
-                  onImagesSelected={(files) => setSelectedCenterImage(files[0])}
-                  preview={center?.imageUrl ? [center.imageUrl] : []}
-                />
-              </div>
-
-              <Button type="submit" disabled={updateCenter.isPending}>
-                {updateCenter.isPending ? "Bezig..." : "Buurthuis bijwerken"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
       </div>
     </CenterAdminLayout>
   );
