@@ -53,9 +53,13 @@ export default function RegistrationsPage() {
       const activitiesWithData = await Promise.all(
         activities.map(async (activity) => {
           const [registrationsRes, waitlistRes] = await Promise.all([
-            fetch(`/api/activities/${activity.id}/registrations`),
-            fetch(`/api/activities/${activity.id}/waitlist`)
+            apiRequest("GET", `/api/activities/${activity.id}/registrations`),
+            apiRequest("GET", `/api/activities/${activity.id}/waitlist`)
           ]);
+
+          if (!registrationsRes.ok || !waitlistRes.ok) {
+            throw new Error("Er is een fout opgetreden bij het ophalen van de data");
+          }
 
           const registrations = await registrationsRes.json();
           const waitlist = await waitlistRes.json();
