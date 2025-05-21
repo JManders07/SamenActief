@@ -144,6 +144,10 @@ export const insertActivitySchema = createInsertSchema(activities).extend({
   })).optional(),
   materialsNeeded: z.string().optional(),
   facilitiesAvailable: z.string().optional(),
+  isRecurring: z.boolean().optional(),
+  recurrencePattern: z.enum(['weekly', 'monthly']).optional(),
+  recurrenceInterval: z.number().int().positive().optional(),
+  isVisible: z.boolean().optional()
 });
 export const insertRegistrationSchema = createInsertSchema(registrations);
 

@@ -25,9 +25,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import {
   Checkbox,
-  CheckboxIndicator,
-  CheckboxItem,
-  CheckboxLabel,
 } from "@/components/ui/checkbox";
 import {
   Select,
@@ -152,6 +149,9 @@ export default function ActivitiesPage() {
           imageUrl: imageUrls[0] || "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
           materialsNeeded: formData.get('materialsNeeded') || "",
           facilitiesAvailable: formData.get('facilitiesAvailable') || "",
+          isRecurring: formData.get('isRecurring') === 'on',
+          recurrencePattern: formData.get('recurrencePattern') as string || null,
+          recurrenceInterval: parseInt(formData.get('recurrenceInterval') as string) || 1,
           images: imageUrls.map((url, index) => ({
             imageUrl: url,
             order: index

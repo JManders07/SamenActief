@@ -622,7 +622,8 @@ export class DatabaseStorage implements IStorage {
         .from(activities)
         .where(and(
           eq(activities.isRecurring, true),
-          isNull(activities.parentActivityId) // Alleen originele activiteiten
+          isNull(activities.parentActivityId), // Alleen originele activiteiten
+          lte(activities.date, new Date()) // Alleen activiteiten die al zijn afgelopen
         ));
 
       for (const activity of recurringActivities) {
@@ -648,6 +649,7 @@ export class DatabaseStorage implements IStorage {
           };
           delete newActivity.id; // Verwijder het id veld
           await this.createActivity(newActivity);
+          console.log(`Created new recurring activity for ${activity.name} on ${nextDate}`);
         }
       }
     } catch (error) {
@@ -661,12 +663,17 @@ export class DatabaseStorage implements IStorage {
       const now = new Date();
       
       // Maak toekomstige activiteiten zichtbaar als hun voorganger is afgelopen
-      await db.update(activities)
+      const updatedActivities = await db.update(activities)
         .set({ isVisible: true })
         .where(and(
           eq(activities.isVisible, false),
           lte(activities.date, now)
-        ));
+        ))
+        .returning();
+
+      if (updatedActivities.length > 0) {
+        console.log(`Made ${updatedActivities.length} activities visible`);
+      }
     } catch (error) {
       console.error('Error in updateActivityVisibility:', error);
       throw error;
