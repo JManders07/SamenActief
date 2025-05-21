@@ -23,6 +23,7 @@
     "@jridgewell/trace-mapping": "^0.3.25",
     "@mui/material": "^7.1.0",
     "@neondatabase/serverless": "^0.10.4",
+    "@prisma/client": "^6.8.2",
     "@radix-ui/react-accordion": "^1.2.3",
     "@radix-ui/react-alert-dialog": "^1.1.2",
     "@radix-ui/react-aspect-ratio": "^1.1.0",
@@ -57,6 +58,7 @@
     "@types/node-cron": "^3.0.11",
     "@types/nodemailer": "^6.4.17",
     "@types/react-google-recaptcha": "^2.1.9",
+    "@types/xlsx": "^0.0.35",
     "axios": "^1.8.4",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
@@ -99,6 +101,7 @@
     "vaul": "^1.1.0",
     "wouter": "^3.3.5",
     "ws": "^8.18.0",
+    "xlsx": "^0.18.5",
     "zod": "^3.23.8",
     "zod-validation-error": "^3.4.0"
   },

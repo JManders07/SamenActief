@@ -130,7 +130,7 @@ export default function ActivitiesPage() {
     const formData = new FormData(e.currentTarget);
     
     try {
-      let imageUrl = editingActivity?.imageUrl;
+      let imageUrl = editingActivity?.imageUrl || "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
 
       // Upload nieuwe afbeelding als er een is geselecteerd
       if (selectedImages.length > 0) {
@@ -153,8 +153,8 @@ export default function ActivitiesPage() {
         date: new Date(formData.get('date') as string),
         capacity: parseInt(formData.get('capacity') as string),
         imageUrl: imageUrl,
-        materialsNeeded: formData.get('materialsNeeded') as string,
-        facilitiesAvailable: formData.get('facilitiesAvailable') as string,
+        materialsNeeded: formData.get('materialsNeeded') as string || null,
+        facilitiesAvailable: formData.get('facilitiesAvailable') as string || null,
       };
 
       if (editingActivity) {
