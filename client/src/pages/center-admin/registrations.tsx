@@ -43,6 +43,42 @@ export default function RegistrationsPage() {
     enabled: !!center?.id,
   });
 
+  // Haal voor elke activiteit de registraties en wachtlijst op
+  const { data: activitiesWithRegistrations } = useQuery<ActivityWithRegistrations[]>({
+    queryKey: ["activities-with-registrations", activities?.map(a => a.id)],
+    enabled: !!activities,
+    queryFn: async () => {
+      if (!activities) return [];
+      
+      const activitiesWithData = await Promise.all(
+        activities.map(async (activity) => {
+          const [registrationsRes, waitlistRes] = await Promise.all([
+            fetch(`/api/activities/${activity.id}/registrations`),
+            fetch(`/api/activities/${activity.id}/waitlist`)
+          ]);
+
+          const registrations = await registrationsRes.json();
+          const waitlist = await waitlistRes.json();
+
+          return {
+            ...activity,
+            registrations: registrations.map((r: any) => ({
+              id: r.id,
+              user: r
+            })),
+            waitlist: waitlist.map((w: any) => ({
+              id: w.id,
+              user: w,
+              registrationDate: w.registrationDate
+            }))
+          };
+        })
+      );
+
+      return activitiesWithData;
+    }
+  });
+
   const removeRegistration = useMutation({
     mutationFn: async ({ activityId, userId }: { activityId: number; userId: number }) => {
       const res = await apiRequest("DELETE", `/api/activities/${activityId}/register`, {
@@ -54,7 +90,7 @@ export default function RegistrationsPage() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/activities`] });
+      queryClient.invalidateQueries({ queryKey: ["activities-with-registrations"] });
       toast({
         title: "Inschrijving verwijderd",
         description: "De inschrijving is succesvol verwijderd.",
@@ -80,7 +116,7 @@ export default function RegistrationsPage() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/activities`] });
+      queryClient.invalidateQueries({ queryKey: ["activities-with-registrations"] });
       toast({
         title: "Wachtlijst verwijderd",
         description: "De persoon is succesvol van de wachtlijst verwijderd.",
@@ -95,11 +131,11 @@ export default function RegistrationsPage() {
     },
   });
 
-  const upcomingActivities = activities?.filter(
+  const upcomingActivities = activitiesWithRegistrations?.filter(
     activity => new Date(activity.date) > new Date()
   ) || [];
 
-  const pastActivities = activities?.filter(
+  const pastActivities = activitiesWithRegistrations?.filter(
     activity => new Date(activity.date) <= new Date()
   ) || [];
 
