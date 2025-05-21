@@ -4,8 +4,36 @@ import { setupAuth } from "./auth";
 import { setupVite, serveStatic, log } from "./vite";
 import { initializeEmailService } from "./email";
 import path from "path";
+import rateLimit from "express-rate-limit";
 
 const app = express();
+
+// Rate limiting configuratie
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minuten
+  max: 100, // maximaal 100 requests per IP per windowMs
+  message: { message: "Te veel requests van dit IP, probeer het later opnieuw" },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+
+// Pas rate limiting toe op alle routes
+app.use(limiter);
+
+// Striktere limiet voor login en registratie endpoints
+const authLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 uur
+  max: 5, // maximaal 5 pogingen per uur
+  message: { message: "Te veel inlogpogingen, probeer het later opnieuw" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Pas de striktere limiet toe op auth endpoints
+app.use("/api/login", authLimiter);
+app.use("/api/register", authLimiter);
+app.use("/api/reset-password", authLimiter);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
