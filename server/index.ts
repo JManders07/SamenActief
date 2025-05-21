@@ -5,6 +5,8 @@ import { setupVite, serveStatic, log } from "./vite";
 import { initializeEmailService } from "./email";
 import path from "path";
 import rateLimit from "express-rate-limit";
+import cron from "node-cron";
+import { storage } from "./storage";
 
 const app = express();
 
@@ -96,6 +98,19 @@ process.on("unhandledRejection", (reason, promise) => {
 
     const server = await registerRoutes(app);
     log("Routes registered successfully");
+
+    // Start cron job voor terugkerende activiteiten
+    // Draait elke dag om middernacht
+    cron.schedule("0 0 * * *", async () => {
+      try {
+        log("Running recurring activities check...");
+        await storage.manageRecurringActivities();
+        log("Recurring activities check completed");
+      } catch (error) {
+        console.error("Error in recurring activities cron job:", error);
+      }
+    });
+    log("Cron job for recurring activities started");
 
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       console.error("Server error:", err);

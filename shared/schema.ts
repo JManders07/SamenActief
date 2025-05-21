@@ -60,6 +60,11 @@ export const activities = pgTable("activities", {
   capacity: integer("capacity").notNull(),
   materialsNeeded: text("materials_needed"),
   facilitiesAvailable: text("facilities_available"),
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
+  isRecurring: boolean("is_recurring").notNull(),
+  recurrencePattern: text("recurrence_pattern").optional(),
+  parentActivityId: integer("parent_activity_id").optional(),
 });
 
 export const registrations = pgTable("registrations", {
@@ -166,3 +171,42 @@ export type PasswordReset = typeof passwordResetTokens.$inferSelect;
 // Add type for activity images
 export type ActivityImage = typeof activityImages.$inferSelect;
 export type InsertActivityImage = typeof activityImages.$inferInsert;
+
+export interface Activity {
+  id: number;
+  centerId: number;
+  title: string;
+  description: string;
+  startTime: Date;
+  endTime: Date;
+  maxParticipants: number;
+  materialsNeeded: string | null;
+  facilitiesAvailable: string | null;
+  imageUrl: string | null;
+  isRecurring: boolean;
+  recurrencePattern?: {
+    frequency: 'weekly' | 'monthly' | 'yearly';
+    interval: number; // bijv. elke 2 weken
+    endDate?: Date; // optionele einddatum voor de herhaling
+  };
+  parentActivityId?: number; // verwijzing naar de originele activiteit
+}
+
+export interface InsertActivity {
+  centerId: number;
+  title: string;
+  description: string;
+  startTime: Date;
+  endTime: Date;
+  maxParticipants: number;
+  materialsNeeded?: string | null;
+  facilitiesAvailable?: string | null;
+  imageUrl?: string | null;
+  isRecurring: boolean;
+  recurrencePattern?: {
+    frequency: 'weekly' | 'monthly' | 'yearly';
+    interval: number;
+    endDate?: Date;
+  };
+  parentActivityId?: number;
+}
