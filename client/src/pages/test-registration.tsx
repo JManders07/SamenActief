@@ -196,7 +196,7 @@ const centerSteps = [
 export default function TestRegistrationPage() {
   const [, setLocation] = useLocation();
   const { register, login } = useAuth();
-  const [activeTab, setActiveTab] = useState<'login' | 'register' | 'register_center'>('register');
+  const [activeTab, setActiveTab] = useState<'login' | 'register' | 'register_center'>('login');
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<Partial<RegisterForm>>({});
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
