@@ -40,37 +40,6 @@ export default function ActivitiesPage() {
     enabled: !!center?.id,
   });
 
-  const createActivity = useMutation({
-    mutationFn: async (data: Partial<Activity>) => {
-      if (!center?.id) throw new Error("Geen buurthuis geselecteerd");
-      const res = await apiRequest("POST", `/api/activities`, {
-        ...data,
-        centerId: center.id,
-        date: data.date ? new Date(data.date).toISOString() : undefined
-      });
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Er is een fout opgetreden bij het aanmaken van de activiteit");
-      }
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/activities`] });
-      setEditingActivity(null);
-      toast({
-        title: "Activiteit toegevoegd",
-        description: "De activiteit is succesvol toegevoegd.",
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Toevoegen mislukt",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
   const updateActivity = useMutation({
     mutationFn: async (data: Partial<Activity>) => {
       if (!editingActivity) return;
@@ -125,52 +94,81 @@ export default function ActivitiesPage() {
     },
   });
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmitActivity = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
-    try {
-      let imageUrl = editingActivity?.imageUrl || "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
+    if (editingActivity) {
+      // Update bestaande activiteit
+      const dateStr = formData.get("date") as string;
+      updateActivity.mutate({
+        name: formData.get("name") as string,
+        description: formData.get("description") as string,
+        date: new Date(dateStr),
+        capacity: parseInt(formData.get("capacity") as string),
+        materialsNeeded: formData.get("materialsNeeded") as string,
+        facilitiesAvailable: formData.get("facilitiesAvailable") as string,
+      });
+    } else {
+      // Maak nieuwe activiteit aan
+      if (!center?.id) return;
 
-      // Upload nieuwe afbeelding als er een is geselecteerd
-      if (selectedImages.length > 0) {
-        const imageFormData = new FormData();
-        imageFormData.append('file', selectedImages[0]);
+      try {
+        const imageUrls = await Promise.all(selectedImages.map(async (file) => {
+          const imageFormData = new FormData();
+          imageFormData.append('file', file);
 
-        const response = await fetch('/api/upload', {
+          const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: imageFormData
+          });
+
+          if (!response.ok) throw new Error('Kon afbeelding niet uploaden');
+          const data = await response.json();
+          return data.url;
+        }));
+
+        const activityData = {
+          name: formData.get('name'),
+          description: formData.get('description'),
+          date: formData.get('date'),
+          capacity: parseInt(formData.get('capacity') as string) || 10,
+          centerId: center.id,
+          imageUrl: imageUrls[0] || "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+          materialsNeeded: formData.get('materialsNeeded') || "",
+          facilitiesAvailable: formData.get('facilitiesAvailable') || "",
+          images: imageUrls.map((url, index) => ({
+            imageUrl: url,
+            order: index
+          }))
+        };
+
+        console.log('Sending activity data:', activityData);
+        const response = await fetch('/api/activities', {
           method: 'POST',
-          body: imageFormData
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(activityData)
         });
 
-        if (!response.ok) throw new Error('Kon afbeelding niet uploaden');
-        const data = await response.json();
-        imageUrl = data.url;
+        const responseData = await response.json();
+
+        if (!response.ok && responseData.message) {
+          throw new Error(responseData.message);
+        }
+
+        queryClient.invalidateQueries({ queryKey: [`/api/activities`] });
+        toast({ title: "Activiteit aangemaakt" });
+        (e.target as HTMLFormElement).reset();
+        setSelectedImages([]);
+      } catch (error) {
+        if (error instanceof Error && error.message) {
+          toast({ 
+            title: "Fout",
+            description: error.message,
+            variant: "destructive"
+          });
+        }
       }
-
-      const activityData = {
-        name: formData.get('name') as string,
-        description: formData.get('description') as string,
-        date: new Date(formData.get('date') as string),
-        capacity: parseInt(formData.get('capacity') as string),
-        imageUrl: imageUrl,
-        materialsNeeded: formData.get('materialsNeeded') as string || null,
-        facilitiesAvailable: formData.get('facilitiesAvailable') as string || null,
-      };
-
-      if (editingActivity) {
-        updateActivity.mutate(activityData);
-      } else {
-        createActivity.mutate(activityData);
-      }
-
-      (e.target as HTMLFormElement).reset();
-      setSelectedImages([]);
-    } catch (error) {
-      toast({
-        title: "Actie mislukt",
-        description: error instanceof Error ? error.message : "Er is een fout opgetreden",
-        variant: "destructive",
-      });
     }
   };
 
@@ -192,7 +190,7 @@ export default function ActivitiesPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmitActivity} className="space-y-4">
                 <div>
                   <label className="text-sm font-medium">Naam</label>
                   <Input 
@@ -247,24 +245,21 @@ export default function ActivitiesPage() {
                   />
                 </div>
 
-                <div>
-                  <label className="text-sm font-medium">Afbeelding</label>
-                  <ImageUpload
-                    onImagesSelected={setSelectedImages}
-                    preview={editingActivity?.imageUrl ? [editingActivity.imageUrl] : []}
-                  />
-                </div>
+                {!editingActivity && (
+                  <div>
+                    <label className="text-sm font-medium">Foto's</label>
+                    <ImageUpload
+                      onImagesSelected={(files) => setSelectedImages(files)}
+                      onRemoveImage={(index) => {
+                        setSelectedImages(prev => prev.filter((_, i) => i !== index));
+                      }}
+                    />
+                  </div>
+                )}
 
                 <div className="flex gap-4">
-                  <Button 
-                    type="submit" 
-                    disabled={updateActivity.isPending || createActivity.isPending}
-                  >
-                    {updateActivity.isPending || createActivity.isPending 
-                      ? "Bezig..." 
-                      : editingActivity 
-                        ? "Activiteit bijwerken" 
-                        : "Activiteit toevoegen"}
+                  <Button type="submit" className="flex-1">
+                    {editingActivity ? "Activiteit bijwerken" : "Activiteit aanmaken"}
                   </Button>
                   {editingActivity && (
                     <Button
