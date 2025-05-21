@@ -574,6 +574,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const userId = req.body.userId;
 
+      // Haal eerst de activiteit op om de capaciteit te controleren
+      const activity = await storage.getActivity(activityId);
+      if (!activity) {
+        return res.status(404).json({ message: "Activiteit niet gevonden" });
+      }
+
+      // Verwijder de registratie
       await storage.deleteRegistration(userId, activityId);
 
       // Get all reminders for this user and activity
@@ -585,11 +592,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.deleteReminder(reminder.id);
       }
 
-      // Check wachtlijst en verplaats eerste persoon
-      const waitlist = await storage.getWaitlist(activityId);
-      if (waitlist.length > 0) {
-        const firstInWaitlist = waitlist[0];
-        await moveFromWaitlistToActivity(firstInWaitlist.userId, activityId);
+      // Check wachtlijst en verplaats eerste persoon als er plek is
+      const registrations = await storage.getRegistrations(activityId);
+      if (registrations.length < activity.capacity) {
+        const waitlist = await storage.getWaitlist(activityId);
+        if (waitlist.length > 0) {
+          const firstInWaitlist = waitlist[0];
+          await moveFromWaitlistToActivity(firstInWaitlist.userId, activityId);
+        }
       }
 
       res.status(204).send();
