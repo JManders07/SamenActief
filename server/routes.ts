@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertUserSchema, insertRegistrationSchema, insertActivitySchema, insertCenterSchema, type User } from "@shared/schema";
 import { hashPassword } from "./auth";
-import { sendWelcomeEmail, sendActivityRegistrationEmail, sendEmail, sendPasswordResetEmail, sendWaitlistConfirmationEmail } from "./email";
+import { sendWelcomeEmail, sendActivityRegistrationEmail, sendEmail, sendPasswordResetEmail, sendWaitlistConfirmationEmail, sendCenterWelcomeEmail } from "./email";
 import multer from "multer";
 import path from "path";
 import { mkdir } from "fs/promises";
@@ -752,46 +752,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Send welcome email if email service is configured
       if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
-        await sendWelcomeEmail(user.username, user.displayName);
-      }
-
-      // Als dit een buurthuis beheerder is, maak dan ook een buurthuis aan
-      if (user.role === 'center_admin') {
-        try {
-          const center = await storage.createCenter({
-            name: user.displayName,
-            address: `${user.neighborhood}, ${user.village}`,
-            description: `Buurthuis ${user.displayName} in ${user.village}`,
-            imageUrl: "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-            adminId: user.id,
-            village: user.village
-          });
-
-          console.log('Created center:', center);
-        } catch (centerError) {
-          console.error('Error creating center:', centerError);
-          // Als het aanmaken van het buurthuis mislukt, verwijder dan de gebruiker
-          await storage.deleteUserData(user.id);
-          return res.status(500).json({ 
-            message: "Er is een fout opgetreden bij het aanmaken van het buurthuis. Probeer het later opnieuw." 
-          });
+        if (user.role === 'center_admin') {
+          await sendCenterWelcomeEmail(user.username, user.displayName);
+        } else {
+          await sendWelcomeEmail(user.username, user.displayName);
         }
       }
 
       req.login(user, (err) => {
-        if (err) {
-          console.error('Login error after registration:', err);
-          return res.status(500).json({ 
-            message: "Er is een fout opgetreden bij het inloggen. Probeer het later opnieuw." 
-          });
-        }
+        if (err) return next(err);
         res.status(201).json(user);
       });
     } catch (err) {
-      console.error('Error in register route:', err);
-      res.status(500).json({ 
-        message: "Er is een fout opgetreden bij het registreren. Probeer het later opnieuw." 
-      });
+      next(err);
     }
   });
 

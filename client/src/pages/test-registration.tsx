@@ -266,6 +266,7 @@ export default function TestRegistrationPage() {
 
     if (currentStep === steps.length - 1) {
       try {
+        const formData = form.getValues();
         await register({
           ...formData,
           role: 'user',
@@ -392,8 +393,9 @@ export default function TestRegistrationPage() {
 
     if (currentCenterStep === centerSteps.length - 1) {
       try {
+        const formData = centerRegisterForm.getValues();
         await register({
-          ...centerFormData,
+          ...formData,
           role: 'center_admin',
         } as RegisterForm);
         setLocation("/home");
@@ -512,6 +514,16 @@ export default function TestRegistrationPage() {
                             </div>
                           </FormControl>
                           <FormMessage className="text-lg" />
+                          <div className="flex justify-end">
+                            <Button
+                              type="button"
+                              variant="link"
+                              className="text-primary hover:text-primary/80"
+                              onClick={() => setLocation("/reset-password")}
+                            >
+                              Wachtwoord vergeten?
+                            </Button>
+                          </div>
                         </FormItem>
                       )}
                     />
