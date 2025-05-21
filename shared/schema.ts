@@ -60,11 +60,6 @@ export const activities = pgTable("activities", {
   capacity: integer("capacity").notNull(),
   materialsNeeded: text("materials_needed"),
   facilitiesAvailable: text("facilities_available"),
-  isRecurring: boolean("is_recurring").notNull().default(false),
-  recurrencePattern: text("recurrence_pattern"), // 'weekly', 'monthly', etc.
-  recurrenceInterval: integer("recurrence_interval"), // elke X weken/maanden
-  parentActivityId: integer("parent_activity_id").references(activities.id), // verwijzing naar originele activiteit
-  isVisible: boolean("is_visible").notNull().default(true), // of deze instantie zichtbaar is
 });
 
 export const registrations = pgTable("registrations", {
@@ -144,10 +139,6 @@ export const insertActivitySchema = createInsertSchema(activities).extend({
   })).optional(),
   materialsNeeded: z.string().optional(),
   facilitiesAvailable: z.string().optional(),
-  isRecurring: z.boolean().optional(),
-  recurrencePattern: z.enum(['weekly', 'monthly']).optional(),
-  recurrenceInterval: z.number().int().positive().optional(),
-  isVisible: z.boolean().optional()
 });
 export const insertRegistrationSchema = createInsertSchema(registrations);
 

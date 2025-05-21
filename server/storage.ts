@@ -7,7 +7,7 @@ import {
   type PasswordReset, type InsertPasswordReset
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, isNull, lte } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -76,10 +76,6 @@ export interface IStorage {
   deletePasswordReset(token: string): Promise<void>;
   updateUserPassword(userId: number, hashedPassword: string): Promise<User>;
   markPasswordResetAsUsed(token: string): Promise<void>;
-
-  // Recurring Activities
-  createRecurringActivities(): Promise<void>;
-  updateActivityVisibility(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -196,8 +192,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createActivity(data: InsertActivity): Promise<Activity> {
-    const result = await db.insert(activities).values(data).returning();
-    return result[0];
+    // Set default image if none provided
+    if (data.imageUrl === "") {
+      data.imageUrl = "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
+    }
+
+    try {
+      const [activity] = await db.insert(activities).values(data).returning();
+      return activity;
+    } catch (error) {
+      console.error('Error in createActivity:', error);
+      throw error;
+    }
   }
 
   async updateActivity(id: number, updates: Partial<Activity>): Promise<Activity> {
@@ -611,71 +617,6 @@ export class DatabaseStorage implements IStorage {
       return user;
     } catch (error) {
       console.error('Error in updateUserPassword:', error);
-      throw error;
-    }
-  }
-
-  async createRecurringActivities(): Promise<void> {
-    try {
-      // Haal alle herhalende activiteiten op die nog niet zijn verwerkt
-      const recurringActivities = await db.select()
-        .from(activities)
-        .where(and(
-          eq(activities.isRecurring, true),
-          isNull(activities.parentActivityId), // Alleen originele activiteiten
-          lte(activities.date, new Date()) // Alleen activiteiten die al zijn afgelopen
-        ));
-
-      for (const activity of recurringActivities) {
-        const lastDate = new Date(activity.date);
-        const now = new Date();
-        
-        // Bereken de volgende datum op basis van het patroon
-        let nextDate = new Date(lastDate);
-        if (activity.recurrencePattern === 'weekly') {
-          nextDate.setDate(nextDate.getDate() + (7 * (activity.recurrenceInterval || 1)));
-        } else if (activity.recurrencePattern === 'monthly') {
-          nextDate.setMonth(nextDate.getMonth() + (activity.recurrenceInterval || 1));
-        }
-
-        // Als de volgende datum in de toekomst ligt, maak een nieuwe activiteit aan
-        if (nextDate > now) {
-          const newActivity = {
-            ...activity,
-            id: undefined, // Laat de database een nieuw ID genereren
-            date: nextDate,
-            parentActivityId: activity.id,
-            isVisible: false // Nieuwe activiteit is initieel verborgen
-          };
-          delete newActivity.id; // Verwijder het id veld
-          await this.createActivity(newActivity);
-          console.log(`Created new recurring activity for ${activity.name} on ${nextDate}`);
-        }
-      }
-    } catch (error) {
-      console.error('Error in createRecurringActivities:', error);
-      throw error;
-    }
-  }
-
-  async updateActivityVisibility(): Promise<void> {
-    try {
-      const now = new Date();
-      
-      // Maak toekomstige activiteiten zichtbaar als hun voorganger is afgelopen
-      const updatedActivities = await db.update(activities)
-        .set({ isVisible: true })
-        .where(and(
-          eq(activities.isVisible, false),
-          lte(activities.date, now)
-        ))
-        .returning();
-
-      if (updatedActivities.length > 0) {
-        console.log(`Made ${updatedActivities.length} activities visible`);
-      }
-    } catch (error) {
-      console.error('Error in updateActivityVisibility:', error);
       throw error;
     }
   }

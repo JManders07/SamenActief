@@ -23,16 +23,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
-import {
-  Checkbox,
-} from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface ActivityWithRegistrations extends Activity {
   registrations?: { id: number }[];
@@ -149,9 +139,6 @@ export default function ActivitiesPage() {
           imageUrl: imageUrls[0] || "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
           materialsNeeded: formData.get('materialsNeeded') || "",
           facilitiesAvailable: formData.get('facilitiesAvailable') || "",
-          isRecurring: formData.get('isRecurring') === 'on',
-          recurrencePattern: formData.get('recurrencePattern') as string || null,
-          recurrenceInterval: parseInt(formData.get('recurrenceInterval') as string) || 1,
           images: imageUrls.map((url, index) => ({
             imageUrl: url,
             order: index
@@ -252,45 +239,6 @@ export default function ActivitiesPage() {
                       defaultValue={editingActivity?.capacity || "10"} 
                       required 
                     />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        name="isRecurring" 
-                        id="isRecurring"
-                        defaultChecked={editingActivity?.isRecurring}
-                      />
-                      <label htmlFor="isRecurring" className="text-sm font-medium">
-                        Herhalende activiteit
-                      </label>
-                    </div>
-                    
-                    <div className="pl-6 space-y-2">
-                      <div>
-                        <label className="text-sm font-medium">Herhalingspatroon</label>
-                        <Select name="recurrencePattern" defaultValue={editingActivity?.recurrencePattern}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecteer patroon" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="weekly">Wekelijks</SelectItem>
-                            <SelectItem value="monthly">Maandelijks</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <div>
-                        <label className="text-sm font-medium">Interval</label>
-                        <Input 
-                          name="recurrenceInterval" 
-                          type="number" 
-                          min="1"
-                          defaultValue={editingActivity?.recurrenceInterval || "1"}
-                          placeholder="Elke X weken/maanden"
-                        />
-                      </div>
-                    </div>
                   </div>
 
                   <div>

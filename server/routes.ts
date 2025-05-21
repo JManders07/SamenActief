@@ -235,11 +235,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const data = {
       ...req.body,
       materialsNeeded: req.body.materialsNeeded || null,
-      facilitiesAvailable: req.body.facilitiesAvailable || null,
-      isRecurring: req.body.isRecurring || false,
-      recurrencePattern: req.body.recurrencePattern || null,
-      recurrenceInterval: req.body.recurrenceInterval || 1,
-      isVisible: true
+      facilitiesAvailable: req.body.facilitiesAvailable || null
     };
 
     const result = insertActivitySchema.safeParse(data);
