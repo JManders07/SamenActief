@@ -17,8 +17,14 @@ export default function Home() {
   const upcomingActivities = activities?.filter(activity => {
     const activityDate = new Date(activity.date);
     const now = new Date();
-    // Vergelijk alleen de datum (niet de tijd)
-    return activityDate.toDateString() >= now.toDateString();
+    
+    // Als de activiteit vandaag is, controleer dan de tijd
+    if (activityDate.toDateString() === now.toDateString()) {
+      return activityDate > now;
+    }
+    
+    // Anders vergelijk alleen de datum
+    return activityDate > now;
   }) || [];
 
   if (isLoadingCenters || isLoadingActivities) {
