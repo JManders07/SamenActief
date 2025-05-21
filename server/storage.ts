@@ -76,9 +76,6 @@ export interface IStorage {
   deletePasswordReset(token: string): Promise<void>;
   updateUserPassword(userId: number, hashedPassword: string): Promise<User>;
   markPasswordResetAsUsed(token: string): Promise<void>;
-
-  // Recurring Activities
-  manageRecurringActivities(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -621,62 +618,6 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Error in updateUserPassword:', error);
       throw error;
-    }
-  }
-
-  // Recurring Activities
-  async manageRecurringActivities() {
-    const now = new Date();
-    
-    // Haal alle terugkerende activiteiten op
-    const recurringActivities = await db.query.activities.findMany({
-      where: (activities, { eq, and, isNull }) => and(
-        eq(activities.isRecurring, true),
-        isNull(activities.parentActivityId) // Alleen de originele activiteiten
-      )
-    });
-
-    for (const activity of recurringActivities) {
-      const pattern = JSON.parse(activity.recurrencePattern || '{}');
-      if (!pattern.frequency || !pattern.interval) continue;
-
-      // Bereken de volgende datum
-      let nextDate = new Date(activity.startTime);
-      while (nextDate <= now) {
-        switch (pattern.frequency) {
-          case 'weekly':
-            nextDate.setDate(nextDate.getDate() + (7 * pattern.interval));
-            break;
-          case 'monthly':
-            nextDate.setMonth(nextDate.getMonth() + pattern.interval);
-            break;
-          case 'yearly':
-            nextDate.setFullYear(nextDate.getFullYear() + pattern.interval);
-            break;
-        }
-      }
-
-      // Controleer of we al een activiteit hebben voor deze datum
-      const existingActivity = await db.query.activities.findFirst({
-        where: (activities, { and, eq, gte, lte }) => and(
-          eq(activities.parentActivityId, activity.id),
-          gte(activities.startTime, nextDate),
-          lte(activities.startTime, new Date(nextDate.getTime() + 24 * 60 * 60 * 1000))
-        )
-      });
-
-      // Als er nog geen activiteit is voor deze datum en we niet voorbij de einddatum zijn
-      if (!existingActivity && (!pattern.endDate || nextDate <= new Date(pattern.endDate))) {
-        // Maak een nieuwe instantie van de activiteit
-        await db.insert(activities).values({
-          ...activity,
-          id: undefined, // Laat de database een nieuw ID genereren
-          startTime: nextDate,
-          endTime: new Date(nextDate.getTime() + (activity.endTime.getTime() - activity.startTime.getTime())),
-          parentActivityId: activity.id,
-          isRecurring: false // De nieuwe instantie is niet terugkerend
-        });
-      }
     }
   }
 }
