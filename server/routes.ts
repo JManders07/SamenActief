@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertUserSchema, insertRegistrationSchema, insertActivitySchema, insertCenterSchema, type User } from "@shared/schema";
 import { hashPassword } from "./auth";
-import { sendWelcomeEmail, sendActivityRegistrationEmail, sendEmail, sendPasswordResetEmail } from "./email";
+import { sendWelcomeEmail, sendActivityRegistrationEmail, sendEmail, sendPasswordResetEmail, sendWaitlistConfirmationEmail } from "./email";
 import multer from "multer";
 import path from "path";
 import { mkdir } from "fs/promises";
@@ -45,6 +45,52 @@ const storageMulter = multer.diskStorage({
 });
 
 const upload = multer({ storage: storageMulter });
+
+// Functie om iemand van de wachtlijst naar de activiteit te verplaatsen
+async function moveFromWaitlistToActivity(userId: number, activityId: number) {
+  const activity = await storage.getActivity(activityId);
+  if (!activity) {
+    throw new Error("Activiteit niet gevonden");
+  }
+
+  // Verwijder van wachtlijst
+  await storage.removeFromWaitlist(userId, activityId);
+
+  // Voeg toe aan activiteit
+  await storage.createRegistration({
+    userId,
+    activityId
+  });
+
+  // Stuur email notificatie
+  if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+    const user = await storage.getUser(userId);
+    const center = await storage.getCenter(activity.centerId);
+    if (user && center) {
+      await sendWaitlistConfirmationEmail(
+        user.username,
+        user.displayName,
+        activity.name,
+        new Date(activity.date),
+        `${center.name}, ${center.address}`
+      );
+    }
+  }
+
+  // Maak een reminder aan
+  const activityDate = new Date(activity.date);
+  const dayBeforeActivity = new Date(activityDate);
+  dayBeforeActivity.setDate(dayBeforeActivity.getDate() - 1);
+
+  await storage.createReminder({
+    userId,
+    activityId,
+    reminderDate: dayBeforeActivity,
+    title: `Herinnering: ${activity.name}`,
+    message: `Morgen begint de activiteit "${activity.name}". Vergeet niet om hierbij aanwezig te zijn!`,
+    isRead: false
+  });
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
@@ -390,7 +436,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (isNaN(activityId)) {
           return res.status(400).json({message: "Invalid activity ID"});
       }
-      const userId = req.user!.id;
+      const userId = req.body.userId;
+
+      // Check of de gebruiker een admin is
+      const centers = await storage.getCentersByAdmin(req.user!.id);
+      const activity = await storage.getActivity(activityId);
+      
+      if (!activity || !centers.some(center => center.id === activity.centerId)) {
+        return res.status(403).json({ message: "Niet geautoriseerd" });
+      }
 
       await storage.removeFromWaitlist(userId, activityId);
       res.status(204).send();
@@ -513,24 +567,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.delete("/api/activities/:id/register", async (req, res) => {
-    const activityId = parseInt(req.params.id);
-    if (isNaN(activityId)) {
+    try {
+      const activityId = parseInt(req.params.id);
+      if (isNaN(activityId)) {
         return res.status(400).json({message: "Invalid activity ID"});
+      }
+      const userId = req.body.userId;
+
+      await storage.deleteRegistration(userId, activityId);
+
+      // Get all reminders for this user and activity
+      const userReminders = await storage.getRemindersByUser(userId);
+      const activityReminders = userReminders.filter(r => r.activityId === activityId);
+
+      // Delete all reminders for this activity
+      for (const reminder of activityReminders) {
+        await storage.deleteReminder(reminder.id);
+      }
+
+      // Check wachtlijst en verplaats eerste persoon
+      const waitlist = await storage.getWaitlist(activityId);
+      if (waitlist.length > 0) {
+        const firstInWaitlist = waitlist[0];
+        await moveFromWaitlistToActivity(firstInWaitlist.userId, activityId);
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      console.error('Error in delete registration:', error);
+      res.status(500).json({ message: "Er is een fout opgetreden" });
     }
-    const userId = req.body.userId;
-
-    await storage.deleteRegistration(userId, activityId);
-
-    // Get all reminders for this user and activity
-    const userReminders = await storage.getRemindersByUser(userId);
-    const activityReminders = userReminders.filter(r => r.activityId === activityId);
-
-    // Delete all reminders for this activity
-    for (const reminder of activityReminders) {
-      await storage.deleteReminder(reminder.id);
-    }
-
-    res.status(204).send();
   });
 
   // New route to get user's activities

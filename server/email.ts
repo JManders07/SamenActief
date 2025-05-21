@@ -140,3 +140,35 @@ export async function sendPasswordResetEmail(email: string, resetToken: string):
 
   return sendEmail({ to: email, subject, html });
 }
+
+export async function sendWaitlistConfirmationEmail(
+  email: string,
+  name: string,
+  activityName: string,
+  activityDate: Date,
+  location: string,
+): Promise<boolean> {
+  const subject = `Goed nieuws! Je kunt deelnemen aan: ${activityName}`;
+  const formattedDate = activityDate.toLocaleDateString('nl-NL', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  const html = `
+    <h1>Gefeliciteerd ${name}!</h1>
+    <p>Er is een plek vrijgekomen voor de activiteit waar je op de wachtlijst stond. Je bent nu officieel ingeschreven!</p>
+    <div style="margin: 20px 0; padding: 15px; background-color: #f5f5f5; border-radius: 5px;">
+      <h2>${activityName}</h2>
+      <p><strong>Datum en tijd:</strong> ${formattedDate}</p>
+      <p><strong>Locatie:</strong> ${location}</p>
+    </div>
+    <p>We kijken ernaar uit je te zien bij de activiteit!</p>
+    <p>Als je toch niet kunt komen, laat het ons dan zo snel mogelijk weten zodat we iemand anders van de wachtlijst kunnen informeren.</p>
+  `;
+
+  return sendEmail({ to: email, subject, html });
+}
