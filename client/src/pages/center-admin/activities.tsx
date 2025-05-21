@@ -40,6 +40,37 @@ export default function ActivitiesPage() {
     enabled: !!center?.id,
   });
 
+  const createActivity = useMutation({
+    mutationFn: async (data: Partial<Activity>) => {
+      if (!center?.id) throw new Error("Geen buurthuis geselecteerd");
+      const res = await apiRequest("POST", `/api/activities`, {
+        ...data,
+        centerId: center.id,
+        date: data.date ? new Date(data.date).toISOString() : undefined
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Er is een fout opgetreden bij het aanmaken van de activiteit");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/activities`] });
+      setEditingActivity(null);
+      toast({
+        title: "Activiteit toegevoegd",
+        description: "De activiteit is succesvol toegevoegd.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Toevoegen mislukt",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const updateActivity = useMutation({
     mutationFn: async (data: Partial<Activity>) => {
       if (!editingActivity) return;
@@ -116,7 +147,7 @@ export default function ActivitiesPage() {
         imageUrl = data.url;
       }
 
-      updateActivity.mutate({
+      const activityData = {
         name: formData.get('name') as string,
         description: formData.get('description') as string,
         date: new Date(formData.get('date') as string),
@@ -124,13 +155,19 @@ export default function ActivitiesPage() {
         imageUrl: imageUrl,
         materialsNeeded: formData.get('materialsNeeded') as string,
         facilitiesAvailable: formData.get('facilitiesAvailable') as string,
-      });
+      };
+
+      if (editingActivity) {
+        updateActivity.mutate(activityData);
+      } else {
+        createActivity.mutate(activityData);
+      }
 
       (e.target as HTMLFormElement).reset();
       setSelectedImages([]);
     } catch (error) {
       toast({
-        title: "Bijwerken mislukt",
+        title: "Actie mislukt",
         description: error instanceof Error ? error.message : "Er is een fout opgetreden",
         variant: "destructive",
       });
@@ -219,8 +256,15 @@ export default function ActivitiesPage() {
                 </div>
 
                 <div className="flex gap-4">
-                  <Button type="submit" disabled={updateActivity.isPending}>
-                    {updateActivity.isPending ? "Bezig..." : editingActivity ? "Activiteit bijwerken" : "Activiteit toevoegen"}
+                  <Button 
+                    type="submit" 
+                    disabled={updateActivity.isPending || createActivity.isPending}
+                  >
+                    {updateActivity.isPending || createActivity.isPending 
+                      ? "Bezig..." 
+                      : editingActivity 
+                        ? "Activiteit bijwerken" 
+                        : "Activiteit toevoegen"}
                   </Button>
                   {editingActivity && (
                     <Button
