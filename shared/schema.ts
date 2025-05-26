@@ -108,6 +108,49 @@ export const passwordResetTokens = pgTable("password_reset_tokens", {
   used: boolean("used").notNull().default(false),
 });
 
+// AVG-gerelateerde tabellen
+export const dataBreaches = pgTable("data_breaches", {
+  id: serial("id").primaryKey(),
+  description: text("description").notNull(),
+  affectedUsers: integer("affected_users").notNull().default(0),
+  severity: text("severity", { enum: ["low", "medium", "high", "critical"] }).notNull(),
+  detectedAt: timestamp("detected_at").notNull(),
+  measures: text("measures").notNull(),
+  reportedBy: integer("reported_by").notNull().references(() => users.id),
+  status: text("status", { enum: ["reported", "investigating", "contained", "resolved"] }).notNull().default("reported"),
+  resolution: text("resolution"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const affectedUsers = pgTable("affected_users", {
+  id: serial("id").primaryKey(),
+  breachId: integer("breach_id").notNull().references(() => dataBreaches.id),
+  userId: integer("user_id").notNull().references(() => users.id),
+  notified: boolean("notified").notNull().default(false),
+  notifiedAt: timestamp("notified_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const dataRetentionRules = pgTable("data_retention_rules", {
+  id: serial("id").primaryKey(),
+  dataType: text("data_type").notNull(),
+  retentionPeriod: integer("retention_period").notNull(),
+  description: text("description").notNull(),
+  legalBasis: text("legal_basis").notNull(),
+  createdBy: integer("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const dataRetentionLogs = pgTable("data_retention_logs", {
+  id: serial("id").primaryKey(),
+  ruleId: integer("rule_id").notNull().references(() => dataRetentionRules.id),
+  dataType: text("data_type").notNull(),
+  recordsDeleted: integer("records_deleted").notNull().default(0),
+  executionTime: timestamp("execution_time").notNull(),
+});
+
 // Insert schemas
 export const insertReminderSchema = createInsertSchema(reminders);
 export const insertWaitlistSchema = createInsertSchema(waitlist);
@@ -166,3 +209,14 @@ export type PasswordReset = typeof passwordResetTokens.$inferSelect;
 // Add type for activity images
 export type ActivityImage = typeof activityImages.$inferSelect;
 export type InsertActivityImage = typeof activityImages.$inferInsert;
+
+// Types voor AVG-gerelateerde tabellen
+export type DataBreach = typeof dataBreaches.$inferSelect;
+export type AffectedUser = typeof affectedUsers.$inferSelect;
+export type DataRetentionRule = typeof dataRetentionRules.$inferSelect;
+export type DataRetentionLog = typeof dataRetentionLogs.$inferSelect;
+
+export type InsertDataBreach = typeof dataBreaches.$inferInsert;
+export type InsertAffectedUser = typeof affectedUsers.$inferInsert;
+export type InsertDataRetentionRule = typeof dataRetentionRules.$inferInsert;
+export type InsertDataRetentionLog = typeof dataRetentionLogs.$inferInsert;

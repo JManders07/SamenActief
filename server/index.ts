@@ -5,6 +5,8 @@ import { setupVite, serveStatic, log } from "./vite";
 import { initializeEmailService } from "./email";
 import path from "path";
 import rateLimit from "express-rate-limit";
+import dataBreachRouter from "./routes/data-breach";
+import dataRetentionRouter from "./routes/data-retention";
 
 const app = express();
 
@@ -86,6 +88,10 @@ process.on("uncaughtException", (err) => {
 process.on("unhandledRejection", (reason, promise) => {
   console.error("Unhandled Rejection at:", promise, "reason:", reason);
 });
+
+// Voeg de nieuwe routes toe
+app.use("/api/data-breach", dataBreachRouter);
+app.use("/api/data-retention", dataRetentionRouter);
 
 // Start server
 (async () => {

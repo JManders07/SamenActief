@@ -106,7 +106,13 @@ export function TermsAndConditions({ checked, onCheckedChange }: TermsAndConditi
                   <h3 className="text-lg font-semibold mb-2">1. Verantwoordelijke</h3>
                   <p>
                     SamenActief is verantwoordelijk voor de verwerking van uw persoonsgegevens
-                    zoals beschreven in deze privacyverklaring.
+                    zoals beschreven in deze privacyverklaring. U kunt contact met ons opnemen via:
+                    <br />
+                    E-mail: privacy@samenactief.nl
+                    <br />
+                    Telefoon: 020-1234567
+                    <br />
+                    Adres: Voorbeeldstraat 123, 1234 AB Amsterdam
                   </p>
                 </section>
 
@@ -118,8 +124,10 @@ export function TermsAndConditions({ checked, onCheckedChange }: TermsAndConditi
                       <li>Naam en contactgegevens</li>
                       <li>E-mailadres</li>
                       <li>Telefoonnummer</li>
-                      <li>Adresgegevens</li>
+                      <li>Adresgegevens (gemeente en wijk)</li>
                       <li>Activiteitvoorkeuren</li>
+                      <li>IP-adres (voor beveiliging)</li>
+                      <li>Gebruikersgedrag (voor verbetering van de dienst)</li>
                     </ul>
                   </p>
                 </section>
@@ -133,30 +141,100 @@ export function TermsAndConditions({ checked, onCheckedChange }: TermsAndConditi
                       <li>Het versturen van nieuwsbrieven en updates</li>
                       <li>Het verbeteren van onze diensten</li>
                       <li>Het voldoen aan wettelijke verplichtingen</li>
+                      <li>Het beheren van activiteiten en inschrijvingen</li>
+                      <li>Het verstrekken van ondersteuning</li>
                     </ul>
                   </p>
                 </section>
 
                 <section>
-                  <h3 className="text-lg font-semibold mb-2">4. Bewaartermijn</h3>
+                  <h3 className="text-lg font-semibold mb-2">4. Rechtsgrond</h3>
+                  <p>
+                    Wij verwerken uw gegevens op basis van:
+                    <ul className="list-disc pl-4 mt-2">
+                      <li>Uw toestemming</li>
+                      <li>De uitvoering van een overeenkomst</li>
+                      <li>Wettelijke verplichtingen</li>
+                      <li>Gerechtvaardigd belang</li>
+                    </ul>
+                  </p>
+                </section>
+
+                <section>
+                  <h3 className="text-lg font-semibold mb-2">5. Bewaartermijn</h3>
                   <p>
                     Wij bewaren uw persoonsgegevens niet langer dan noodzakelijk is voor het
-                    doel waarvoor ze zijn verzameld, tenzij er een wettelijke verplichting
-                    bestaat om de gegevens langer te bewaren.
+                    doel waarvoor ze zijn verzameld:
+                    <ul className="list-disc pl-4 mt-2">
+                      <li>Accountgegevens: tot 2 jaar na laatste activiteit</li>
+                      <li>Activiteitsgegevens: 1 jaar na de activiteit</li>
+                      <li>Communicatiegegevens: 1 jaar na laatste contact</li>
+                      <li>Analytische gegevens: 26 maanden</li>
+                    </ul>
                   </p>
                 </section>
 
                 <section>
-                  <h3 className="text-lg font-semibold mb-2">5. Uw rechten</h3>
+                  <h3 className="text-lg font-semibold mb-2">6. Uw rechten</h3>
                   <p>
-                    U heeft het recht om:
+                    U heeft de volgende rechten:
                     <ul className="list-disc pl-4 mt-2">
-                      <li>Inzage te krijgen in uw persoonsgegevens</li>
-                      <li>Uw persoonsgegevens te laten corrigeren</li>
-                      <li>Uw persoonsgegevens te laten verwijderen</li>
-                      <li>Bezwaar te maken tegen de verwerking</li>
-                      <li>Gegevensoverdracht te verzoeken</li>
+                      <li>Recht op inzage in uw gegevens</li>
+                      <li>Recht op correctie van onjuiste gegevens</li>
+                      <li>Recht op verwijdering van uw gegevens</li>
+                      <li>Recht op beperking van de verwerking</li>
+                      <li>Recht op dataportabiliteit</li>
+                      <li>Recht om bezwaar te maken tegen verwerking</li>
+                      <li>Recht om toestemming in te trekken</li>
                     </ul>
+                    U kunt deze rechten uitoefenen door contact met ons op te nemen.
+                  </p>
+                </section>
+
+                <section>
+                  <h3 className="text-lg font-semibold mb-2">7. Gegevensdeling</h3>
+                  <p>
+                    Wij delen uw gegevens alleen met:
+                    <ul className="list-disc pl-4 mt-2">
+                      <li>Buurthuizen en organisatoren van activiteiten</li>
+                      <li>IT-dienstverleners (voor hosting en onderhoud)</li>
+                      <li>Analytics-diensten (anoniem)</li>
+                    </ul>
+                    Alleen indien strikt noodzakelijk en met passende beveiligingsmaatregelen.
+                  </p>
+                </section>
+
+                <section>
+                  <h3 className="text-lg font-semibold mb-2">8. Beveiliging</h3>
+                  <p>
+                    Wij nemen passende technische en organisatorische maatregelen om uw gegevens te beschermen:
+                    <ul className="list-disc pl-4 mt-2">
+                      <li>Versleuteling van gegevens</li>
+                      <li>Toegangsbeperkingen</li>
+                      <li>Regelmatige security audits</li>
+                      <li>Back-up procedures</li>
+                    </ul>
+                  </p>
+                </section>
+
+                <section>
+                  <h3 className="text-lg font-semibold mb-2">9. Cookies</h3>
+                  <p>
+                    Wij gebruiken cookies voor:
+                    <ul className="list-disc pl-4 mt-2">
+                      <li>Essentiële functionaliteit</li>
+                      <li>Analytics (anoniem)</li>
+                      <li>Gebruikersvoorkeuren</li>
+                    </ul>
+                    U kunt uw cookie-instellingen altijd aanpassen.
+                  </p>
+                </section>
+
+                <section>
+                  <h3 className="text-lg font-semibold mb-2">10. Klachten</h3>
+                  <p>
+                    Heeft u een klacht over de verwerking van uw gegevens? Neem dan contact met ons op.
+                    U heeft ook het recht om een klacht in te dienen bij de Autoriteit Persoonsgegevens.
                   </p>
                 </section>
               </div>

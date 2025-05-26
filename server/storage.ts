@@ -8,6 +8,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
+import { pool } from "./pool";
 
 export interface IStorage {
   // Users
@@ -623,3 +624,72 @@ export class DatabaseStorage implements IStorage {
 }
 
 export const storage = new DatabaseStorage();
+
+export async function anonymizeUser(userId: number): Promise<void> {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // Anonimiseer gebruikersgegevens
+    await client.query(
+      `UPDATE users 
+       SET display_name = 'Anonieme Gebruiker',
+           email = $1,
+           phone = NULL,
+           village = 'Anoniem',
+           neighborhood = 'Anoniem'
+       WHERE id = $2`,
+      [`deleted_${userId}@deleted.com`, userId]
+    );
+
+    // Anonimiseer gerelateerde activiteitsgegevens
+    await client.query(
+      `UPDATE activity_registrations 
+       SET notes = NULL
+       WHERE user_id = $1`,
+      [userId]
+    );
+
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+export async function deleteUser(userId: number): Promise<void> {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // Verwijder gebruikersgegevens
+    await client.query('DELETE FROM users WHERE id = $1', [userId]);
+
+    // Verwijder gerelateerde gegevens
+    await client.query('DELETE FROM activity_registrations WHERE user_id = $1', [userId]);
+    await client.query('DELETE FROM user_sessions WHERE user_id = $1', [userId]);
+
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+export async function logDataDeletion(data: {
+  userId: number;
+  timestamp: Date;
+  reason: string;
+  type: string;
+}): Promise<void> {
+  await pool.query(
+    `INSERT INTO data_deletion_logs 
+     (user_id, timestamp, reason, type)
+     VALUES ($1, $2, $3, $4)`,
+    [data.userId, data.timestamp, data.reason, data.type]
+  );
+}
