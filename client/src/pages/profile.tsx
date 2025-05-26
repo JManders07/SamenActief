@@ -27,7 +27,6 @@ import {
 import { useLocation } from "wouter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
 export default function Profile() {
@@ -245,106 +244,100 @@ export default function Profile() {
         <TabsContent value="profiel">
           <Card>
             <CardContent className="pt-6">
-              <div className="flex items-start space-x-6">
-                <Avatar className="h-24 w-24">
-                  <AvatarImage src={`https://avatar.vercel.sh/${user.username}`} />
-                  <AvatarFallback className="text-2xl">{getInitials(user.displayName)}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 space-y-6">
-                  {!isEditing ? (
+              <div className="flex-1 space-y-6">
+                {!isEditing ? (
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2 text-muted-foreground">
+                        <User className="h-4 w-4" />
+                        <span>Naam</span>
+                      </div>
+                      <p className="text-lg font-medium">{user.displayName}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2 text-muted-foreground">
+                        <Mail className="h-4 w-4" />
+                        <span>E-mailadres</span>
+                      </div>
+                      <p className="text-lg font-medium">{user.username}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2 text-muted-foreground">
+                        <Phone className="h-4 w-4" />
+                        <span>Telefoonnummer</span>
+                      </div>
+                      <p className="text-lg font-medium">{user.phone}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2 text-muted-foreground">
+                        <MapPin className="h-4 w-4" />
+                        <span>Locatie</span>
+                      </div>
+                      <p className="text-lg font-medium">{user.village}, {user.neighborhood}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid gap-6 md:grid-cols-2">
                       <div className="space-y-2">
-                        <div className="flex items-center space-x-2 text-muted-foreground">
-                          <User className="h-4 w-4" />
-                          <span>Naam</span>
-                        </div>
-                        <p className="text-lg font-medium">{user.displayName}</p>
+                        <Label htmlFor="displayName">Naam</Label>
+                        <Input
+                          id="displayName"
+                          value={formData.displayName}
+                          onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
+                          required
+                        />
                       </div>
                       <div className="space-y-2">
-                        <div className="flex items-center space-x-2 text-muted-foreground">
-                          <Mail className="h-4 w-4" />
-                          <span>E-mailadres</span>
-                        </div>
-                        <p className="text-lg font-medium">{user.username}</p>
+                        <Label htmlFor="username">E-mailadres</Label>
+                        <Input
+                          id="username"
+                          type="email"
+                          value={formData.username}
+                          onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                          required
+                        />
                       </div>
                       <div className="space-y-2">
-                        <div className="flex items-center space-x-2 text-muted-foreground">
-                          <Phone className="h-4 w-4" />
-                          <span>Telefoonnummer</span>
-                        </div>
-                        <p className="text-lg font-medium">{user.phone}</p>
+                        <Label htmlFor="phone">Telefoonnummer</Label>
+                        <Input
+                          id="phone"
+                          value={formData.phone}
+                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          required
+                        />
                       </div>
                       <div className="space-y-2">
-                        <div className="flex items-center space-x-2 text-muted-foreground">
-                          <MapPin className="h-4 w-4" />
-                          <span>Locatie</span>
-                        </div>
-                        <p className="text-lg font-medium">{user.village}, {user.neighborhood}</p>
+                        <Label htmlFor="village">Woonplaats</Label>
+                        <Input
+                          id="village"
+                          value={formData.village}
+                          onChange={(e) => setFormData({ ...formData, village: e.target.value })}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="neighborhood">Wijk</Label>
+                        <Input
+                          id="neighborhood"
+                          value={formData.neighborhood}
+                          onChange={(e) => setFormData({ ...formData, neighborhood: e.target.value })}
+                          required
+                        />
                       </div>
                     </div>
-                  ) : (
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                      <div className="grid gap-6 md:grid-cols-2">
-                        <div className="space-y-2">
-                          <Label htmlFor="displayName">Naam</Label>
-                          <Input
-                            id="displayName"
-                            value={formData.displayName}
-                            onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
-                            required
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="username">E-mailadres</Label>
-                          <Input
-                            id="username"
-                            type="email"
-                            value={formData.username}
-                            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                            required
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="phone">Telefoonnummer</Label>
-                          <Input
-                            id="phone"
-                            value={formData.phone}
-                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                            required
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="village">Woonplaats</Label>
-                          <Input
-                            id="village"
-                            value={formData.village}
-                            onChange={(e) => setFormData({ ...formData, village: e.target.value })}
-                            required
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="neighborhood">Wijk</Label>
-                          <Input
-                            id="neighborhood"
-                            value={formData.neighborhood}
-                            onChange={(e) => setFormData({ ...formData, neighborhood: e.target.value })}
-                            required
-                          />
-                        </div>
-                      </div>
-                      <div className="flex justify-end space-x-2">
-                        <Button type="button" variant="outline" onClick={handleCancelEdit}>
-                          <X className="mr-2 h-4 w-4" />
-                          Annuleren
-                        </Button>
-                        <Button type="submit">
-                          <Save className="mr-2 h-4 w-4" />
-                          Opslaan
-                        </Button>
-                      </div>
-                    </form>
-                  )}
-                </div>
+                    <div className="flex justify-end space-x-2">
+                      <Button type="button" variant="outline" onClick={handleCancelEdit}>
+                        <X className="mr-2 h-4 w-4" />
+                        Annuleren
+                      </Button>
+                      <Button type="submit">
+                        <Save className="mr-2 h-4 w-4" />
+                        Opslaan
+                      </Button>
+                    </div>
+                  </form>
+                )}
               </div>
             </CardContent>
           </Card>
