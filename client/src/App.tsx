@@ -24,7 +24,6 @@ import Navigation from "@/components/navigation";
 import ResetPasswordPage from "@/pages/reset-password";
 import ResetPassword from '@/pages/ResetPassword';
 import TestRegistration from '@/pages/test-registration';
-import { CookieConsent } from "@/components/cookie-consent";
 
 function Router() {
   return (
@@ -64,7 +63,6 @@ function App() {
               </main>
             </div>
             <Toaster />
-            <CookieConsent />
           </ThemeProvider>
         </AuthProvider>
       </QueryClientProvider>
