@@ -1,59 +1,114 @@
 import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { APIError } from "@/components/api-error";
+import { ErrorRecovery } from "@/components/error-recovery";
+import { useErrorHandling } from "@/hooks/use-error-handling";
 
-interface Props {
+interface ErrorBoundaryProps {
   children: React.ReactNode;
+  fallback?: React.ReactNode;
+  onError?: (error: Error) => void;
+  autoRetry?: boolean;
+  maxRetries?: number;
+  retryDelay?: number;
 }
 
-interface State {
+interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
+  retryCount: number;
 }
 
-export class ErrorBoundary extends React.Component<Props, State> {
-  constructor(props: Props) {
+export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, retryCount: 0 };
   }
 
-  static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error, retryCount: 0 };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("Error caught by boundary:", error, errorInfo);
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
+    if (this.props.onError) {
+      this.props.onError(error);
+    }
   }
+
+  handleRetry = async () => {
+    this.setState({ hasError: false, error: null });
+    window.location.reload();
+  };
 
   render() {
     if (this.state.hasError) {
+      if (this.props.fallback) {
+        return this.props.fallback;
+      }
+
       return (
-        <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">
-          <Card className="w-full max-w-md mx-4">
-            <CardContent className="pt-6">
-              <div className="flex flex-col items-center text-center">
-                <div className="rounded-full bg-red-100 p-3 mb-4">
-                  <AlertCircle className="h-8 w-8 text-red-500" />
-                </div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Er is iets misgegaan</h1>
-                <p className="text-gray-600 mb-6">
-                  Er is een onverwachte fout opgetreden. Probeer de pagina te verversen of neem contact op met de beheerder als het probleem aanhoudt.
-                </p>
-                <Button
-                  onClick={() => window.location.reload()}
-                  className="w-full flex items-center gap-2"
-                >
-                  <RefreshCw className="h-4 w-4" />
-                  Pagina verversen
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="p-4 space-y-4">
+          <APIError 
+            error={this.state.error!} 
+            onRetry={this.handleRetry}
+          />
+          {this.props.autoRetry && (
+            <ErrorRecovery
+              error={this.state.error!}
+              onRetry={this.handleRetry}
+              maxAttempts={this.props.maxRetries}
+              retryDelay={this.props.retryDelay}
+            />
+          )}
         </div>
       );
     }
 
     return this.props.children;
   }
+}
+
+// Hook wrapper voor functionele componenten
+export function useErrorBoundary(options: {
+  autoRetry?: boolean;
+  maxRetries?: number;
+  retryDelay?: number;
+} = {}) {
+  const { autoRetry = false, maxRetries, retryDelay } = options;
+  
+  const { error, handleError, reset } = useErrorHandling({
+    autoRetry,
+    maxRetries,
+    retryDelay,
+    onError: (error) => {
+      console.error("Error caught by error boundary:", error);
+    },
+  });
+
+  const handleRetry = async () => {
+    reset();
+    window.location.reload();
+  };
+
+  return {
+    error,
+    handleError,
+    reset,
+    ErrorDisplay: error ? (
+      <div className="p-4 space-y-4">
+        <APIError 
+          error={error} 
+          onRetry={handleRetry}
+        />
+        {autoRetry && (
+          <ErrorRecovery
+            error={error}
+            onRetry={handleRetry}
+            maxAttempts={maxRetries}
+            retryDelay={retryDelay}
+          />
+        )}
+      </div>
+    ) : null,
+  };
 } 
