@@ -18,12 +18,18 @@ interface AdminLayoutProps {
 }
 
 export function AdminLayout({ children }: AdminLayoutProps) {
-  const { user, logout } = useAuth();
+  const { user, isLoading, logout } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
+  if (isLoading) {
+    return null;
+  }
+
   if (!user || user.role !== 'admin') {
-    setLocation("/auth");
+    if (window.location.pathname !== '/auth') {
+      setLocation("/auth");
+    }
     return null;
   }
 
