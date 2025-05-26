@@ -9,6 +9,7 @@ import {
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
 import { pool } from "./pool";
+import { hashPassword } from "./utils";
 
 export interface IStorage {
   // Users
@@ -77,6 +78,40 @@ export interface IStorage {
   deletePasswordReset(token: string): Promise<void>;
   updateUserPassword(userId: number, hashedPassword: string): Promise<User>;
   markPasswordResetAsUsed(token: string): Promise<void>;
+
+  // Admin statistieken
+  getTotalUsers(): Promise<number>;
+  getNewUsersThisMonth(): Promise<number>;
+  getTotalCenters(): Promise<number>;
+  getActiveCenters(): Promise<number>;
+  getTotalActivities(): Promise<number>;
+  getUpcomingActivities(): Promise<number>;
+  getTotalRegistrations(): Promise<number>;
+  getRegistrationsThisMonth(): Promise<number>;
+
+  // Admin gebruikersbeheer
+  getAllUsers();
+
+  // Admin buurthuizen beheer
+  getAllCenters();
+
+  // Admin activiteiten beheer
+  getAllActivities();
+
+  // Systeem logs
+  getSystemLogs();
+
+  // Systeem instellingen
+  getSystemSettings();
+  updateSystemSettings(settings: Record<string, any>);
+
+  // Admin gebruiker maken
+  createAdminUser(data: {
+    username: string;
+    password: string;
+    displayName: string;
+    email: string;
+  });
 }
 
 export class DatabaseStorage implements IStorage {
@@ -620,6 +655,129 @@ export class DatabaseStorage implements IStorage {
       console.error('Error in updateUserPassword:', error);
       throw error;
     }
+  }
+
+  // Admin statistieken
+  async getTotalUsers(): Promise<number> {
+    const result = await db.query("SELECT COUNT(*) as count FROM users");
+    return result[0].count;
+  }
+
+  async getNewUsersThisMonth(): Promise<number> {
+    const result = await db.query(
+      "SELECT COUNT(*) as count FROM users WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE)"
+    );
+    return result[0].count;
+  }
+
+  async getTotalCenters(): Promise<number> {
+    const result = await db.query("SELECT COUNT(*) as count FROM centers");
+    return result[0].count;
+  }
+
+  async getActiveCenters(): Promise<number> {
+    const result = await db.query(
+      "SELECT COUNT(*) as count FROM centers WHERE status = 'active'"
+    );
+    return result[0].count;
+  }
+
+  async getTotalActivities(): Promise<number> {
+    const result = await db.query("SELECT COUNT(*) as count FROM activities");
+    return result[0].count;
+  }
+
+  async getUpcomingActivities(): Promise<number> {
+    const result = await db.query(
+      "SELECT COUNT(*) as count FROM activities WHERE start_date > CURRENT_DATE"
+    );
+    return result[0].count;
+  }
+
+  async getTotalRegistrations(): Promise<number> {
+    const result = await db.query("SELECT COUNT(*) as count FROM registrations");
+    return result[0].count;
+  }
+
+  async getRegistrationsThisMonth(): Promise<number> {
+    const result = await db.query(
+      "SELECT COUNT(*) as count FROM registrations WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE)"
+    );
+    return result[0].count;
+  }
+
+  // Admin gebruikersbeheer
+  async getAllUsers() {
+    return db.query(`
+      SELECT id, username, display_name, email, role, created_at, last_login
+      FROM users
+      ORDER BY created_at DESC
+    `);
+  }
+
+  // Admin buurthuizen beheer
+  async getAllCenters() {
+    return db.query(`
+      SELECT c.*, u.display_name as admin_name
+      FROM centers c
+      LEFT JOIN users u ON c.admin_id = u.id
+      ORDER BY c.created_at DESC
+    `);
+  }
+
+  // Admin activiteiten beheer
+  async getAllActivities() {
+    return db.query(`
+      SELECT a.*, c.name as center_name
+      FROM activities a
+      LEFT JOIN centers c ON a.center_id = c.id
+      ORDER BY a.start_date DESC
+    `);
+  }
+
+  // Systeem logs
+  async getSystemLogs() {
+    return db.query(`
+      SELECT *
+      FROM system_logs
+      ORDER BY created_at DESC
+      LIMIT 1000
+    `);
+  }
+
+  // Systeem instellingen
+  async getSystemSettings() {
+    return db.query("SELECT * FROM system_settings");
+  }
+
+  async updateSystemSettings(settings: Record<string, any>) {
+    const entries = Object.entries(settings);
+    for (const [key, value] of entries) {
+      await db.query(
+        "INSERT INTO system_settings (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = ?",
+        [key, JSON.stringify(value), JSON.stringify(value)]
+      );
+    }
+    return this.getSystemSettings();
+  }
+
+  // Admin gebruiker maken
+  async createAdminUser(data: {
+    username: string;
+    password: string;
+    displayName: string;
+    email: string;
+  }) {
+    const hashedPassword = await hashPassword(data.password);
+    
+    const result = await db.query(
+      `INSERT INTO users (username, password, display_name, email, role)
+       VALUES (?, ?, ?, ?, 'admin')
+       RETURNING id, username, display_name, email, role`,
+      [data.username, hashedPassword, data.displayName, data.email]
+    );
+
+    return result[0];
   }
 }
 

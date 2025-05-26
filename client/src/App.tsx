@@ -24,6 +24,7 @@ import Navigation from "@/components/navigation";
 import ResetPasswordPage from "@/pages/reset-password";
 import ResetPassword from '@/pages/ResetPassword';
 import TestRegistration from '@/pages/test-registration';
+import AdminDashboard from "@/pages/admin/dashboard";
 
 function Router() {
   return (
@@ -45,6 +46,7 @@ function Router() {
       <Route path="/help" component={Help} />
       <Route path="/contact" component={Contact} />
       <Route path="/about" component={About} />
+      <Route path="/admin" component={AdminDashboard} />
       <Route component={NotFound} />
     </Switch>
   );

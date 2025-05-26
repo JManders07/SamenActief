@@ -2,7 +2,7 @@ import { pgTable, text, serial, integer, boolean, timestamp, pgEnum } from "driz
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const roleEnum = pgEnum('role', ['user', 'center_admin']);
+export const roleEnum = pgEnum('role', ['user', 'center_admin', 'admin']);
 
 // Add images table for activities
 export const activityImages = pgTable("activity_images", {
@@ -35,7 +35,7 @@ export const users = pgTable("users", {
   phone: text("phone").notNull(),
   village: text("village").notNull(),
   neighborhood: text("neighborhood").notNull(),
-  role: text("role", { enum: ["user", "center_admin"] }).notNull().default("user"),
+  role: text("role", { enum: ["user", "center_admin", "admin"] }).notNull().default("user"),
   anonymousParticipation: boolean("anonymous_participation").notNull().default(false),
   hasSeenOnboarding: boolean("has_seen_onboarding").notNull().default(false),
 });

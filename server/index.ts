@@ -7,6 +7,7 @@ import path from "path";
 import rateLimit from "express-rate-limit";
 import dataBreachRouter from "./routes/data-breach";
 import dataRetentionRouter from "./routes/data-retention";
+import adminRouter from "./routes/admin";
 
 const app = express();
 
@@ -92,6 +93,10 @@ process.on("unhandledRejection", (reason, promise) => {
 // Voeg de nieuwe routes toe
 app.use("/api/data-breach", dataBreachRouter);
 app.use("/api/data-retention", dataRetentionRouter);
+
+// Admin routes
+app.use("/api/admin", adminRouter);
+log("Admin routes registered");
 
 // Start server
 (async () => {

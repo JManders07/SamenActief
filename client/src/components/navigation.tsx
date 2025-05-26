@@ -27,6 +27,10 @@ export default function Navigation() {
       { href: "/center-admin", label: "Beheer Buurthuis", icon: Settings },
       { href: "/activity-stats", label: "Statistieken", icon: BarChart },
     ] : []),
+    // Show admin panel for admin users
+    ...(user?.role === 'admin' ? [
+      { href: "/admin", label: "Admin Panel", icon: Settings },
+    ] : []),
     // Help page accessible only to regular users or when not logged in
     ...(!user?.role || user?.role === 'user' ? [
       { href: "/help", label: "Hulp", icon: HelpCircle },
