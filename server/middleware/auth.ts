@@ -1,4 +1,6 @@
 import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
+import { storage } from "../storage";
 
 export function isAdmin(req: Request, res: Response, next: NextFunction) {
   if (!req.isAuthenticated()) {
@@ -30,4 +32,27 @@ export function isAuthenticated(req: Request, res: Response, next: NextFunction)
   }
 
   next();
+}
+
+export function authenticateToken(req: Request, res: Response, next: NextFunction) {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ message: "Geen token gevonden" });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET || "your-secret-key", async (err: any, user: any) => {
+    if (err) {
+      return res.status(403).json({ message: "Ongeldige token" });
+    }
+
+    const dbUser = await storage.getUser(user.id);
+    if (!dbUser) {
+      return res.status(403).json({ message: "Gebruiker niet gevonden" });
+    }
+
+    req.user = dbUser;
+    next();
+  });
 } 

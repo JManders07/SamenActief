@@ -6,10 +6,11 @@ import {
   type InsertCarpool, type InsertCarpoolPassenger, type ActivityImage, type InsertActivityImage,
   type PasswordReset, type InsertPasswordReset
 } from "@shared/schema";
-import { db } from "./db";
+import { db, pool } from "./db";
 import { eq, and } from "drizzle-orm";
-import { pool } from "./pool";
 import { hashPassword } from "./auth";
+
+export { db };
 
 export interface IStorage {
   // Users
@@ -90,20 +91,20 @@ export interface IStorage {
   getRegistrationsThisMonth(): Promise<number>;
 
   // Admin gebruikersbeheer
-  getAllUsers();
+  getAllUsers(): Promise<User[]>;
 
   // Admin buurthuizen beheer
-  getAllCenters();
+  getAllCenters(): Promise<Center[]>;
 
   // Admin activiteiten beheer
-  getAllActivities();
+  getAllActivities(): Promise<Activity[]>;
 
   // Systeem logs
-  getSystemLogs();
+  getSystemLogs(): Promise<any[]>;
 
   // Systeem instellingen
-  getSystemSettings();
-  updateSystemSettings(settings: Record<string, any>);
+  getSystemSettings(): Promise<any[]>;
+  updateSystemSettings(settings: Record<string, any>): Promise<any[]>;
 
   // Admin gebruiker maken
   createAdminUser(data: {
@@ -111,7 +112,7 @@ export interface IStorage {
     password: string;
     displayName: string;
     email: string;
-  });
+  }): Promise<User>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -659,102 +660,107 @@ export class DatabaseStorage implements IStorage {
 
   // Admin statistieken
   async getTotalUsers(): Promise<number> {
-    const result = await db.query("SELECT COUNT(*) as count FROM users");
-    return result[0].count;
+    const result = await pool.query("SELECT COUNT(*) as count FROM users");
+    return result.rows[0].count;
   }
 
   async getNewUsersThisMonth(): Promise<number> {
-    const result = await db.query(
+    const result = await pool.query(
       "SELECT COUNT(*) as count FROM users WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE)"
     );
-    return result[0].count;
+    return result.rows[0].count;
   }
 
   async getTotalCenters(): Promise<number> {
-    const result = await db.query("SELECT COUNT(*) as count FROM centers");
-    return result[0].count;
+    const result = await pool.query("SELECT COUNT(*) as count FROM centers");
+    return result.rows[0].count;
   }
 
   async getActiveCenters(): Promise<number> {
-    const result = await db.query(
+    const result = await pool.query(
       "SELECT COUNT(*) as count FROM centers WHERE status = 'active'"
     );
-    return result[0].count;
+    return result.rows[0].count;
   }
 
   async getTotalActivities(): Promise<number> {
-    const result = await db.query("SELECT COUNT(*) as count FROM activities");
-    return result[0].count;
+    const result = await pool.query("SELECT COUNT(*) as count FROM activities");
+    return result.rows[0].count;
   }
 
   async getUpcomingActivities(): Promise<number> {
-    const result = await db.query(
+    const result = await pool.query(
       "SELECT COUNT(*) as count FROM activities WHERE start_date > CURRENT_DATE"
     );
-    return result[0].count;
+    return result.rows[0].count;
   }
 
   async getTotalRegistrations(): Promise<number> {
-    const result = await db.query("SELECT COUNT(*) as count FROM registrations");
-    return result[0].count;
+    const result = await pool.query("SELECT COUNT(*) as count FROM registrations");
+    return result.rows[0].count;
   }
 
   async getRegistrationsThisMonth(): Promise<number> {
-    const result = await db.query(
+    const result = await pool.query(
       "SELECT COUNT(*) as count FROM registrations WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE)"
     );
-    return result[0].count;
+    return result.rows[0].count;
   }
 
   // Admin gebruikersbeheer
-  async getAllUsers() {
-    return db.query(`
+  async getAllUsers(): Promise<User[]> {
+    const result = await pool.query(`
       SELECT id, username, display_name, email, role, created_at, last_login
       FROM users
       ORDER BY created_at DESC
     `);
+    return result.rows;
   }
 
   // Admin buurthuizen beheer
-  async getAllCenters() {
-    return db.query(`
+  async getAllCenters(): Promise<Center[]> {
+    const result = await pool.query(`
       SELECT c.*, u.display_name as admin_name
       FROM centers c
       LEFT JOIN users u ON c.admin_id = u.id
       ORDER BY c.created_at DESC
     `);
+    return result.rows;
   }
 
   // Admin activiteiten beheer
-  async getAllActivities() {
-    return db.query(`
+  async getAllActivities(): Promise<Activity[]> {
+    const result = await pool.query(`
       SELECT a.*, c.name as center_name
       FROM activities a
       LEFT JOIN centers c ON a.center_id = c.id
       ORDER BY a.start_date DESC
     `);
+    return result.rows;
   }
 
   // Systeem logs
-  async getSystemLogs() {
-    return db.query(`
+  async getSystemLogs(): Promise<any[]> {
+    const result = await pool.query(`
       SELECT *
       FROM system_logs
       ORDER BY created_at DESC
       LIMIT 1000
     `);
+    return result.rows;
   }
 
   // Systeem instellingen
-  async getSystemSettings() {
-    return db.query("SELECT * FROM system_settings");
+  async getSystemSettings(): Promise<any[]> {
+    const result = await pool.query("SELECT * FROM system_settings");
+    return result.rows;
   }
 
-  async updateSystemSettings(settings: Record<string, any>) {
+  async updateSystemSettings(settings: Record<string, any>): Promise<any[]> {
     const entries = Object.entries(settings);
     for (const [key, value] of entries) {
-      await db.query(
-        "INSERT INTO system_settings (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = ?",
+      await pool.query(
+        "INSERT INTO system_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = $3",
         [key, JSON.stringify(value), JSON.stringify(value)]
       );
     }
@@ -767,17 +773,17 @@ export class DatabaseStorage implements IStorage {
     password: string;
     displayName: string;
     email: string;
-  }) {
+  }): Promise<User> {
     const hashedPassword = await hashPassword(data.password);
     
-    const result = await db.query(
+    const result = await pool.query(
       `INSERT INTO users (username, password, display_name, email, role)
-       VALUES (?, ?, ?, ?, 'admin')
+       VALUES ($1, $2, $3, $4, 'admin')
        RETURNING id, username, display_name, email, role`,
       [data.username, hashedPassword, data.displayName, data.email]
     );
 
-    return result[0];
+    return result.rows[0];
   }
 }
 
