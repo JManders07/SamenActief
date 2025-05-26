@@ -25,6 +25,15 @@ import ResetPasswordPage from "@/pages/reset-password";
 import ResetPassword from '@/pages/ResetPassword';
 import TestRegistration from '@/pages/test-registration';
 import AdminDashboard from "@/pages/admin/dashboard";
+import AdminUsers from "@/pages/admin/users";
+import AdminCenters from "@/pages/admin/centers";
+import AdminActivities from "@/pages/admin/activities";
+import AdminStats from "@/pages/admin/stats";
+import AdminNotifications from "@/pages/admin/notifications";
+import AdminEmailTemplates from "@/pages/admin/email-templates";
+import AdminSecurity from "@/pages/admin/security";
+import AdminLogs from "@/pages/admin/logs";
+import AdminSettings from "@/pages/admin/settings";
 
 function Router() {
   return (
@@ -47,6 +56,15 @@ function Router() {
       <Route path="/contact" component={Contact} />
       <Route path="/about" component={About} />
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin/users" component={AdminUsers} />
+      <Route path="/admin/centers" component={AdminCenters} />
+      <Route path="/admin/activities" component={AdminActivities} />
+      <Route path="/admin/stats" component={AdminStats} />
+      <Route path="/admin/notifications" component={AdminNotifications} />
+      <Route path="/admin/email-templates" component={AdminEmailTemplates} />
+      <Route path="/admin/security" component={AdminSecurity} />
+      <Route path="/admin/logs" component={AdminLogs} />
+      <Route path="/admin/settings" component={AdminSettings} />
       <Route component={NotFound} />
     </Switch>
   );
