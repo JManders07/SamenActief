@@ -193,6 +193,10 @@ export default function Profile() {
               Bewerken
             </Button>
           ) : null}
+          <Button variant="outline" onClick={() => setLocation("/settings")}>
+            <Settings className="mr-2 h-4 w-4" />
+            Gegevensrechten
+          </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive">
