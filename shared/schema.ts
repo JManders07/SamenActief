@@ -48,6 +48,8 @@ export const centers = pgTable("centers", {
   imageUrl: text("image_url").notNull(),
   adminId: integer("admin_id").notNull(),
   village: text("village").notNull(),
+  latitude: text("latitude"),
+  longitude: text("longitude"),
 });
 
 export const activities = pgTable("activities", {

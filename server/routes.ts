@@ -153,9 +153,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Centers
   app.get("/api/centers", async (req, res) => {
-    const village = req.user?.village;
-    const centers = await storage.getCenters(village);
-    res.json(centers);
+    try {
+      const village = req.user?.village;
+      const centers = await storage.getCenters(village);
+      
+      // Als er een locatie en radius zijn opgegeven, filter de centers
+      if (req.query.lat && req.query.lng && req.query.radius) {
+        const lat = parseFloat(req.query.lat as string);
+        const lng = parseFloat(req.query.lng as string);
+        const radius = parseFloat(req.query.radius as string);
+        
+        const filteredCenters = centers.filter(center => {
+          if (!center.latitude || !center.longitude) return false;
+          
+          const centerLat = parseFloat(center.latitude);
+          const centerLng = parseFloat(center.longitude);
+          
+          // Bereken afstand tussen twee punten met de Haversine formule
+          const R = 6371; // Aardradius in km
+          const dLat = (centerLat - lat) * Math.PI / 180;
+          const dLng = (centerLng - lng) * Math.PI / 180;
+          const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat * Math.PI / 180) * Math.cos(centerLat * Math.PI / 180) * 
+            Math.sin(dLng/2) * Math.sin(dLng/2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+          const distance = R * c;
+          
+          return distance <= radius;
+        });
+        
+        return res.json(filteredCenters);
+      }
+      
+      res.json(centers);
+    } catch (error) {
+      console.error('Error in /api/centers:', error);
+      res.status(500).json({ message: "Er is een fout opgetreden" });
+    }
   });
 
   app.get("/api/centers/:id", async (req, res) => {
@@ -744,6 +779,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...req.body,
         password: await hashPassword(req.body.password),
       });
+
+      // Als het een buurthuis admin is, maak een buurthuis aan met locatie-gegevens
+      if (user.role === 'center_admin') {
+        await storage.createCenter({
+          name: user.displayName,
+          address: `${req.body.neighborhood}, ${req.body.village}`,
+          description: `Buurthuis ${user.displayName} in ${req.body.village}`,
+          imageUrl: "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+          adminId: user.id,
+          village: req.body.village,
+          latitude: req.body.latitude,
+          longitude: req.body.longitude,
+        });
+      }
 
       // Send welcome email if email service is configured
       if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
