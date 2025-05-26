@@ -1,5 +1,5 @@
 import { storage } from "../server/storage";
-import { hashPassword } from "../server/utils";
+import { hashPassword } from "../server/auth";
 import readline from "readline";
 
 const rl = readline.createInterface({

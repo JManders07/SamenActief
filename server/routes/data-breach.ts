@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { db } from "../storage";
 import { authenticateToken } from "../middleware/auth";
-import { sendEmail } from "../lib/email";
+import { sendEmail } from "../email";
 
 const router = Router();
 
