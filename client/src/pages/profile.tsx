@@ -344,6 +344,30 @@ export default function Profile() {
               </div>
             </CardContent>
           </Card>
+
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <User className="mr-2 h-5 w-5" />
+                Privacy
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="anonymous"
+                  checked={user.anonymousParticipation}
+                  onCheckedChange={(checked) => updateAnonymous.mutate(checked as boolean)}
+                />
+                <Label htmlFor="anonymous">
+                  Anoniem deelnemen aan activiteiten
+                </Label>
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Als u deze optie inschakelt, wordt uw naam niet zichtbaar voor andere deelnemers.
+              </p>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="activiteiten">
@@ -361,7 +385,7 @@ export default function Profile() {
                 <ActivityCard
                   key={activity.id}
                   activity={activity}
-                  onUnregister={() => unregister.mutate(activity.id)}
+                  onRegister={() => unregister.mutate(activity.id)}
                 />
               ))}
             </div>
@@ -378,7 +402,7 @@ export default function Profile() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <RemindersPanel />
+                <RemindersPanel userId={user.id} />
               </CardContent>
             </Card>
 
@@ -391,30 +415,6 @@ export default function Profile() {
               </CardHeader>
               <CardContent>
                 <AccessibilitySettings />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <User className="mr-2 h-5 w-5" />
-                  Privacy
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="anonymous"
-                    checked={user.anonymousParticipation}
-                    onCheckedChange={(checked) => updateAnonymous.mutate(checked as boolean)}
-                  />
-                  <Label htmlFor="anonymous">
-                    Anoniem deelnemen aan activiteiten
-                  </Label>
-                </div>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Als u deze optie inschakelt, wordt uw naam niet zichtbaar voor andere deelnemers.
-                </p>
               </CardContent>
             </Card>
           </div>
