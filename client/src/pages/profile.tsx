@@ -1,13 +1,13 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { ActivityCard } from "@/components/activity-card";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Activity } from "@shared/schema";
-import { Building2, MapPin, Edit, Save, X, Trash2 } from "lucide-react";
+import { Building2, MapPin, Edit, Save, X, Trash2, User, Mail, Phone, Calendar, Settings, Bell } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +25,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useLocation } from "wouter";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 export default function Profile() {
   const { user } = useAuth();
@@ -167,187 +171,255 @@ export default function Profile() {
     );
   }
 
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase();
+  };
+
   return (
-    <div className="space-y-8">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between text-2xl font-bold">
-          <span>Mijn Profiel</span>
-          <div className="flex gap-2">
-            {!isEditing ? (
-              <Button variant="outline" size="icon" onClick={handleEditClick}>
-                <Edit className="h-4 w-4" />
+    <div className="container mx-auto max-w-5xl space-y-8 py-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-bold">Mijn Profiel</h1>
+          <p className="text-muted-foreground">Beheer uw persoonlijke gegevens en instellingen</p>
+        </div>
+        <div className="flex gap-2">
+          {!isEditing ? (
+            <Button variant="outline" onClick={handleEditClick}>
+              <Edit className="mr-2 h-4 w-4" />
+              Bewerken
+            </Button>
+          ) : null}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive">
+                <Trash2 className="mr-2 h-4 w-4" />
+                Account verwijderen
               </Button>
-            ) : null}
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="icon">
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Account verwijderen</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Weet u zeker dat u uw account wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.
-                    Alle uw gegevens, inschrijvingen en activiteiten zullen permanent worden verwijderd.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Annuleren</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => deleteAccount.mutate()}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  >
-                    Account verwijderen
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            {!isEditing ? (
-              <div className="space-y-4">
-                <div>
-                  <label className="text-lg font-medium">Naam</label>
-                  <p className="text-xl">{user.displayName}</p>
-                </div>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Account verwijderen</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Weet u zeker dat u uw account wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+                  Alle uw gegevens, inschrijvingen en activiteiten zullen permanent worden verwijderd.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Annuleren</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => deleteAccount.mutate()}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Account verwijderen
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </div>
 
-                <div className="flex items-center space-x-2">
-                  <MapPin className="h-5 w-5" />
-                  <div>
-                    <label className="text-lg font-medium">Locatie</label>
-                    <p className="text-xl">{user.village}, {user.neighborhood}</p>
-                  </div>
-                </div>
+      <Tabs defaultValue="profiel" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="profiel">
+            <User className="mr-2 h-4 w-4" />
+            Profiel
+          </TabsTrigger>
+          <TabsTrigger value="activiteiten">
+            <Calendar className="mr-2 h-4 w-4" />
+            Activiteiten
+          </TabsTrigger>
+          <TabsTrigger value="instellingen">
+            <Settings className="mr-2 h-4 w-4" />
+            Instellingen
+          </TabsTrigger>
+        </TabsList>
 
-                <div>
-                  <label className="text-lg font-medium">Telefoonnummer</label>
-                  <p className="text-xl">{user.phone}</p>
-                </div>
-                <div>
-                  <label className="text-lg font-medium">E-mailadres</label>
-                  <p className="text-xl">{user.username}</p>
+        <TabsContent value="profiel">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-start space-x-6">
+                <Avatar className="h-24 w-24">
+                  <AvatarImage src={`https://avatar.vercel.sh/${user.username}`} />
+                  <AvatarFallback className="text-2xl">{getInitials(user.displayName)}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 space-y-6">
+                  {!isEditing ? (
+                    <div className="grid gap-6 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2 text-muted-foreground">
+                          <User className="h-4 w-4" />
+                          <span>Naam</span>
+                        </div>
+                        <p className="text-lg font-medium">{user.displayName}</p>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2 text-muted-foreground">
+                          <Mail className="h-4 w-4" />
+                          <span>E-mailadres</span>
+                        </div>
+                        <p className="text-lg font-medium">{user.username}</p>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2 text-muted-foreground">
+                          <Phone className="h-4 w-4" />
+                          <span>Telefoonnummer</span>
+                        </div>
+                        <p className="text-lg font-medium">{user.phone}</p>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2 text-muted-foreground">
+                          <MapPin className="h-4 w-4" />
+                          <span>Locatie</span>
+                        </div>
+                        <p className="text-lg font-medium">{user.village}, {user.neighborhood}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                      <div className="grid gap-6 md:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="displayName">Naam</Label>
+                          <Input
+                            id="displayName"
+                            value={formData.displayName}
+                            onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="username">E-mailadres</Label>
+                          <Input
+                            id="username"
+                            type="email"
+                            value={formData.username}
+                            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="phone">Telefoonnummer</Label>
+                          <Input
+                            id="phone"
+                            value={formData.phone}
+                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="village">Woonplaats</Label>
+                          <Input
+                            id="village"
+                            value={formData.village}
+                            onChange={(e) => setFormData({ ...formData, village: e.target.value })}
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="neighborhood">Wijk</Label>
+                          <Input
+                            id="neighborhood"
+                            value={formData.neighborhood}
+                            onChange={(e) => setFormData({ ...formData, neighborhood: e.target.value })}
+                            required
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-end space-x-2">
+                        <Button type="button" variant="outline" onClick={handleCancelEdit}>
+                          <X className="mr-2 h-4 w-4" />
+                          Annuleren
+                        </Button>
+                        <Button type="submit">
+                          <Save className="mr-2 h-4 w-4" />
+                          Opslaan
+                        </Button>
+                      </div>
+                    </form>
+                  )}
                 </div>
               </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="username">E-mailadres</Label>
-                  <Input
-                    id="username"
-                    type="email"
-                    value={formData.username}
-                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="displayName">Naam</Label>
-                  <Input
-                    id="displayName"
-                    value={formData.displayName}
-                    onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
-                    required
-                  />
-                </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Telefoonnummer</Label>
-                  <Input
-                    id="phone"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    required
-                  />
-                </div>
+        <TabsContent value="activiteiten">
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold">Mijn Activiteiten</h2>
+                <p className="text-muted-foreground">
+                  {myActivities?.length || 0} activiteiten waar u voor bent ingeschreven
+                </p>
+              </div>
+            </div>
+            <div className="grid gap-6 md:grid-cols-2">
+              {myActivities?.map((activity) => (
+                <ActivityCard
+                  key={activity.id}
+                  activity={activity}
+                  onUnregister={() => unregister.mutate(activity.id)}
+                />
+              ))}
+            </div>
+          </div>
+        </TabsContent>
 
-                <div className="space-y-2">
-                  <Label htmlFor="village">Gemeente</Label>
-                  <Input
-                    id="village"
-                    value={formData.village}
-                    onChange={(e) => setFormData({ ...formData, village: e.target.value })}
-                    required
-                  />
-                </div>
+        <TabsContent value="instellingen">
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Bell className="mr-2 h-5 w-5" />
+                  Notificaties
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <RemindersPanel />
+              </CardContent>
+            </Card>
 
-                <div className="space-y-2">
-                  <Label htmlFor="neighborhood">Wijk</Label>
-                  <Input
-                    id="neighborhood"
-                    value={formData.neighborhood}
-                    onChange={(e) => setFormData({ ...formData, neighborhood: e.target.value })}
-                    required
-                  />
-                </div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Settings className="mr-2 h-5 w-5" />
+                  Toegankelijkheid
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AccessibilitySettings />
+              </CardContent>
+            </Card>
 
-                <div className="flex space-x-2 pt-2">
-                  <Button type="submit" disabled={updateProfile.isPending}>
-                    {updateProfile.isPending ? "Bezig..." : "Opslaan"}
-                    {!updateProfile.isPending && <Save className="ml-2 h-4 w-4" />}
-                  </Button>
-                  <Button type="button" variant="outline" onClick={handleCancelEdit}>
-                    Annuleren
-                    <X className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              </form>
-            )}
-
-            <div className="flex items-center space-x-3">
-              <div className="relative flex items-start">
-                <div className="flex h-6 items-center">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <User className="mr-2 h-5 w-5" />
+                  Privacy
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center space-x-2">
                   <Checkbox
                     id="anonymous"
                     checked={user.anonymousParticipation}
-                    onCheckedChange={(checked) => {
-                      updateAnonymous.mutate(checked as boolean);
-                    }}
-                    className="h-5 w-5"
+                    onCheckedChange={(checked) => updateAnonymous.mutate(checked as boolean)}
                   />
+                  <Label htmlFor="anonymous">
+                    Anoniem deelnemen aan activiteiten
+                  </Label>
                 </div>
-                <label
-                  htmlFor="anonymous"
-                  className="ml-3 cursor-pointer text-sm font-medium leading-6 hover:text-primary"
-                >
-                  Anoniem deelnemen aan activiteiten
-                </label>
-              </div>
-            </div>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Als u deze optie inschakelt, wordt uw naam niet zichtbaar voor andere deelnemers.
+                </p>
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
-
-      <div className="space-y-8">
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold">Herinneringen</h2>
-          {user && <RemindersPanel userId={user.id} />}
-        </div>
-
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold">Mijn Activiteiten</h2>
-          <div className="grid gap-6 md:grid-cols-2">
-            {myActivities?.map((activity) => (
-              <ActivityCard
-                key={activity.id}
-                activity={activity}
-                isRegistered={true}
-                onRegister={() => {
-                  if (!user) return;
-                  unregister.mutate(activity.id);
-                }}
-              />
-            ))}
-            {(!myActivities || myActivities.length === 0) && (
-              <p className="col-span-2 text-center text-lg text-muted-foreground">
-                U bent nog niet aangemeld voor activiteiten
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
