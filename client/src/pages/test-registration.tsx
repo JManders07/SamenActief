@@ -27,7 +27,6 @@ import { TermsAndConditions } from "@/components/terms-and-conditions";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, Eye, EyeOff, User, Mail, Lock, Phone, Home, MapPin, UserX, FileText, ClipboardList } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { LocationMap } from "@/components/location-map";
 
 const loginSchema = z.object({
   username: z.string()
@@ -177,14 +176,6 @@ const centerSteps = [
     example: "Bijvoorbeeld: Centrum of Woensel",
   },
   {
-    title: "Locatie",
-    description: (name: string) => `Beste ${name}, selecteer de exacte locatie van het buurthuis op de kaart.`,
-    field: "location",
-    icon: MapPin,
-    encouragement: "Perfect! De locatie is geregistreerd.",
-    example: "Klik op de kaart om de locatie te selecteren",
-  },
-  {
     title: "Voorwaarden",
     description: (name: string) => `Beste ${name}, lees en accepteer de voorwaarden en privacyverklaring.`,
     field: "acceptedTerms",
@@ -215,7 +206,6 @@ export default function TestRegistrationPage() {
   const [currentCenterStep, setCurrentCenterStep] = useState(0);
   const [centerFormData, setCenterFormData] = useState<Partial<RegisterForm>>({});
   const [showCenterEncouragement, setShowCenterEncouragement] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   const loginForm = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -388,7 +378,7 @@ export default function TestRegistrationPage() {
     const currentField = centerSteps[currentCenterStep].field;
     const value = centerRegisterForm.getValues(currentField as keyof RegisterForm);
     
-    if (!value && currentField !== "acceptedTerms" && currentField !== "overview" && currentField !== "location") {
+    if (!value && currentField !== "acceptedTerms" && currentField !== "overview") {
       centerRegisterForm.setError(currentField as keyof RegisterForm, {
         type: "manual",
         message: "Dit veld is verplicht",
@@ -399,10 +389,6 @@ export default function TestRegistrationPage() {
     setCenterFormData(prev => ({
       ...prev,
       [currentField]: value,
-      ...(currentField === "location" && selectedLocation ? {
-        latitude: selectedLocation.lat.toString(),
-        longitude: selectedLocation.lng.toString(),
-      } : {}),
     }));
 
     if (currentCenterStep === centerSteps.length - 1) {
@@ -1275,15 +1261,6 @@ export default function TestRegistrationPage() {
                           />
                         )}
 
-                        {currentCenterStepData.field === "location" && (
-                          <div className="space-y-4">
-                            <LocationMap
-                              onLocationSelect={(lat, lng) => setSelectedLocation({ lat, lng })}
-                              initialLocation={selectedLocation ? [selectedLocation.lat, selectedLocation.lng] : undefined}
-                            />
-                          </div>
-                        )}
-
                         {currentCenterStepData.field === "acceptedTerms" && (
                           <FormField
                             control={centerRegisterForm.control}
@@ -1341,25 +1318,6 @@ export default function TestRegistrationPage() {
                                 Wijk:
                               </div>
                               <div>{centerFormData.neighborhood}</div>
-                              
-                              <div className="font-semibold flex items-center">
-                                <MapPin className="h-5 w-5 mr-2" />
-                                Locatie:
-                              </div>
-                              <div>
-                                {centerFormData.latitude && centerFormData.longitude ? (
-                                  <LocationMap
-                                    initialLocation={[parseFloat(centerFormData.latitude), parseFloat(centerFormData.longitude)]}
-                                    markers={[{
-                                      position: [parseFloat(centerFormData.latitude), parseFloat(centerFormData.longitude)],
-                                      title: centerFormData.displayName,
-                                      description: centerFormData.address
-                                    }]}
-                                  />
-                                ) : (
-                                  "Geen locatie geselecteerd"
-                                )}
-                              </div>
                             </div>
                             <div className="bg-muted p-4 rounded-lg text-lg">
                               <p className="flex items-center">

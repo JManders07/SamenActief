@@ -30,9 +30,7 @@ async function migrate() {
         description TEXT NOT NULL,
         image_url TEXT NOT NULL,
         admin_id INTEGER NOT NULL,
-        village TEXT NOT NULL,
-        latitude TEXT,
-        longitude TEXT
+        village TEXT NOT NULL
       );
     `);
 
