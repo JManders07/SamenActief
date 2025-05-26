@@ -9,7 +9,7 @@ import {
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
 import { pool } from "./pool";
-import { hashPassword } from "./utils";
+import { hashPassword } from "./auth";
 
 export interface IStorage {
   // Users
