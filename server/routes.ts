@@ -120,21 +120,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     // Controleer Cloudinary configuratie
     if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-      console.error('Cloudinary configuratie ontbreekt');
+      console.error('Cloudinary configuratie ontbreekt:', {
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME ? 'ingesteld' : 'ontbreekt',
+        api_key: process.env.CLOUDINARY_API_KEY ? 'ingesteld' : 'ontbreekt',
+        api_secret: process.env.CLOUDINARY_API_SECRET ? 'ingesteld' : 'ontbreekt'
+      });
       return res.status(500).json({ message: 'Cloudinary configuratie ontbreekt' });
     }
 
     try {
       console.log('Start upload naar Cloudinary...');
+      console.log('Bestandstype:', req.file.mimetype);
+      console.log('Bestandsgrootte:', req.file.size);
       
       // Upload naar Cloudinary met extra opties
       const stream = cloudinary.v2.uploader.upload_stream({
         folder: 'samenactief',
-        resource_type: 'image',
+        resource_type: 'auto', // Laat Cloudinary het type bepalen
         use_filename: true,
         unique_filename: true,
         overwrite: false,
         timestamp: Math.floor(Date.now() / 1000), // Gebruik huidige timestamp
+        format: 'png', // Forceer PNG formaat
+        quality: 'auto', // Automatische kwaliteitsoptimalisatie
       }, (error, result) => {
         if (error) {
           console.error('Cloudinary upload error:', error);
@@ -149,7 +157,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(500).json({ message: 'Upload naar Cloudinary mislukt - geen resultaat' });
         }
 
-        console.log('Upload succesvol:', result.secure_url);
+        console.log('Upload succesvol:', {
+          url: result.secure_url,
+          public_id: result.public_id,
+          format: result.format,
+          size: result.bytes
+        });
         res.json({ url: result.secure_url });
       });
 

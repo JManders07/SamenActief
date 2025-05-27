@@ -528,14 +528,27 @@ export class DatabaseStorage implements IStorage {
 
   async getActivityImages(activityId: number): Promise<ActivityImage[]> {
     try {
-      return await db
+      console.log('Fetching images for activity:', activityId);
+      
+      // Controleer eerst of de activiteit bestaat
+      const activity = await this.getActivity(activityId);
+      if (!activity) {
+        console.log('Activity not found:', activityId);
+        return [];
+      }
+
+      const images = await db
         .select()
         .from(activityImages)
         .where(eq(activityImages.activityId, activityId))
         .orderBy(activityImages.order);
+
+      console.log('Found images:', images);
+      return images;
     } catch (error) {
       console.error('Error in getActivityImages:', error);
-      throw error;
+      // In plaats van de error door te gooien, return een lege array
+      return [];
     }
   }
 

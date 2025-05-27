@@ -53,6 +53,11 @@ export function ActivityCard({
     gcTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    onError: (error) => {
+      console.error('Error fetching activity images:', error);
+    }
   });
 
   // Combineer hoofdfoto met extra afbeeldingen
