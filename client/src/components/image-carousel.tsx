@@ -63,6 +63,7 @@ export function ImageCarousel({ images }: ImageCarouselProps) {
         onLoad={() => handleImageLoad(validImages[currentIndex])}
         loading="eager"
         crossOrigin="anonymous"
+        referrerPolicy="no-referrer"
       />
       
       {validImages.length > 1 && (

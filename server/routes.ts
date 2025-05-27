@@ -136,13 +136,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Upload naar Cloudinary met extra opties
       const stream = cloudinary.v2.uploader.upload_stream({
         folder: 'samenactief',
-        resource_type: 'auto', // Laat Cloudinary het type bepalen
+        resource_type: 'auto',
         use_filename: true,
         unique_filename: true,
         overwrite: false,
-        timestamp: Math.floor(Date.now() / 1000), // Gebruik huidige timestamp
-        format: 'png', // Forceer PNG formaat
-        quality: 'auto', // Automatische kwaliteitsoptimalisatie
+        format: 'png',
+        quality: 'auto',
       }, (error, result) => {
         if (error) {
           console.error('Cloudinary upload error:', error);
