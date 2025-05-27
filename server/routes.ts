@@ -10,6 +10,8 @@ import { mkdir } from "fs/promises";
 import express from "express";
 import axios from "axios";
 import { randomBytes } from "crypto";
+import cloudinary from 'cloudinary';
+import { Readable } from 'stream';
 
 // Middleware om te controleren of een gebruiker een center admin is
 function isCenterAdmin(req: Request, res: Response, next: NextFunction) {
@@ -44,7 +46,14 @@ const storageMulter = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage: storageMulter });
+const upload = multer({ storage: multer.memoryStorage() });
+
+// Cloudinary configuratie
+cloudinary.v2.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // Functie om iemand van de wachtlijst naar de activiteit te verplaatsen
 async function moveFromWaitlistToActivity(userId: number, activityId: number) {
@@ -104,13 +113,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/uploads', express.static(path.join(process.cwd(), 'public', 'uploads')));
 
   // File upload endpoint - moet voor andere routes komen
-  app.post("/api/upload", upload.single('file'), (req, res) => {
+  app.post("/api/upload", upload.single('file'), async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: "Geen bestand geüpload" });
     }
-    console.log('File uploaded:', req.file);
-    const fileUrl = `/uploads/${req.file.filename}`;
-    res.json({ url: fileUrl });
+
+    try {
+      // Upload naar Cloudinary
+      const stream = cloudinary.v2.uploader.upload_stream({
+        folder: 'samenactief',
+        resource_type: 'image',
+      }, (error, result) => {
+        if (error || !result) {
+          console.error('Cloudinary upload error:', error);
+          return res.status(500).json({ message: 'Upload naar Cloudinary mislukt' });
+        }
+        res.json({ url: result.secure_url });
+      });
+      Readable.from(req.file.buffer).pipe(stream);
+    } catch (error) {
+      console.error('Cloudinary upload error:', error);
+      res.status(500).json({ message: 'Upload naar Cloudinary mislukt' });
+    }
   });
 
   // Nieuwe route om het buurthuis van een admin op te halen
