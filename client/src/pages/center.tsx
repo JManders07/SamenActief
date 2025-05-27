@@ -40,7 +40,7 @@ export default function CenterPage() {
     <div className="space-y-8">
       <div className="relative h-64 overflow-hidden rounded-lg">
         <img
-          src={center.imageUrl}
+          src={`/api/proxy-image?url=${encodeURIComponent(center.imageUrl)}`}
           alt={center.name}
           className="h-full w-full object-cover"
         />

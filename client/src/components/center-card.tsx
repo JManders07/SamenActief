@@ -15,7 +15,7 @@ export function CenterCard({ center, upcomingActivities = [] }: CenterCardProps)
       <a className="block transition-transform hover:scale-[1.02]">
         <Card className="overflow-hidden">
           <img
-            src={center.imageUrl}
+            src={`/api/proxy-image?url=${encodeURIComponent(center.imageUrl)}`}
             alt={center.name}
             className="h-48 w-full object-cover"
           />

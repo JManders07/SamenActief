@@ -84,7 +84,7 @@ export function ActivityCard({
           <ImageCarousel images={allImages} />
         ) : (
           <img
-            src={activity.imageUrl}
+            src={`/api/proxy-image?url=${encodeURIComponent(activity.imageUrl)}`}
             alt={activity.name}
             className="h-full w-full object-cover"
           />
