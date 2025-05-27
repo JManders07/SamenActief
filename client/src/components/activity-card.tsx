@@ -64,7 +64,7 @@ export function ActivityCard({
   const allImages = [
     activity.imageUrl,
     ...(activityImages?.filter(img => img.imageUrl !== activity.imageUrl).map((img: ActivityImage) => img.imageUrl) || [])
-  ].filter(Boolean);
+  ].filter((url, index, self) => self.indexOf(url) === index); // Verwijder dubbele URLs
 
   console.log('Activity card images:', activityImages); // Debug logging
   console.log('Activity card all images:', allImages); // Debug logging

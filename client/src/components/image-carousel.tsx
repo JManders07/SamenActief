@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -9,24 +9,45 @@ interface ImageCarouselProps {
 export function ImageCarousel({ images }: ImageCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
-
-  const next = () => {
-    setCurrentIndex((current) => (current + 1) % images.length);
-  };
-
-  const previous = () => {
-    setCurrentIndex((current) => (current - 1 + images.length) % images.length);
-  };
+  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
 
   // Filter out failed images
   const validImages = images.filter(img => !failedImages.has(img));
 
-  console.log('ImageCarousel images:', images); // Debug logging
-  console.log('Failed images:', Array.from(failedImages)); // Debug logging
+  useEffect(() => {
+    // Reset state when images change
+    setCurrentIndex(0);
+    setFailedImages(new Set());
+    setLoadedImages(new Set());
+  }, [images]);
+
+  const handlePrevious = () => {
+    setCurrentIndex((prev) => (prev === 0 ? validImages.length - 1 : prev - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev === validImages.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleImageError = (imageUrl: string) => {
+    console.error('Error loading image:', imageUrl);
+    setFailedImages(prev => new Set([...prev, imageUrl]));
+    
+    // Probeer de volgende afbeelding te laden als de huidige mislukt
+    if (currentIndex < validImages.length - 1) {
+      setCurrentIndex(prev => prev + 1);
+    } else if (currentIndex > 0) {
+      setCurrentIndex(prev => prev - 1);
+    }
+  };
+
+  const handleImageLoad = (imageUrl: string) => {
+    setLoadedImages(prev => new Set([...prev, imageUrl]));
+  };
 
   if (validImages.length === 0) {
     return (
-      <div className="relative h-full w-full bg-muted flex items-center justify-center">
+      <div className="h-full w-full flex items-center justify-center bg-muted">
         <p className="text-muted-foreground">Geen afbeeldingen beschikbaar</p>
       </div>
     );
@@ -36,46 +57,32 @@ export function ImageCarousel({ images }: ImageCarouselProps) {
     <div className="relative h-full w-full">
       <img
         src={validImages[currentIndex]}
-        alt={`Slide ${currentIndex + 1}`}
+        alt={`Afbeelding ${currentIndex + 1}`}
         className="h-full w-full object-cover"
-        onError={(e) => {
-          console.error('Error loading image:', validImages[currentIndex]); // Debug logging
-          setFailedImages(prev => new Set([...prev, validImages[currentIndex]]));
-          // Probeer de volgende afbeelding te laden
-          if (validImages.length > 1) {
-            next();
-          }
-        }}
+        onError={() => handleImageError(validImages[currentIndex])}
+        onLoad={() => handleImageLoad(validImages[currentIndex])}
+        loading="eager"
+        crossOrigin="anonymous"
       />
+      
       {validImages.length > 1 && (
         <>
           <Button
             variant="ghost"
             size="icon"
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white hover:bg-black/70"
-            onClick={previous}
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white"
+            onClick={handlePrevious}
           >
             <ChevronLeft className="h-6 w-6" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white hover:bg-black/70"
-            onClick={next}
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white"
+            onClick={handleNext}
           >
             <ChevronRight className="h-6 w-6" />
           </Button>
-          <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1">
-            {validImages.map((_, index) => (
-              <button
-                key={index}
-                className={`h-2 w-2 rounded-full ${
-                  index === currentIndex ? "bg-white" : "bg-white/50"
-                }`}
-                onClick={() => setCurrentIndex(index)}
-              />
-            ))}
-          </div>
         </>
       )}
     </div>
