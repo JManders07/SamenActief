@@ -94,15 +94,6 @@ export default function CenterPage() {
   return (
     <CenterAdminLayout>
       <div className="container mx-auto py-8">
-        <Alert variant="destructive" className="mb-8">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Let op!</AlertTitle>
-          <AlertDescription>
-            Er is momenteel een probleem met het uploaden van afbeeldingen. Ons team werkt hier hard aan om dit op te lossen. 
-            U kunt nog steeds uw buurthuis bewerken, maar het uploaden van nieuwe afbeeldingen is tijdelijk niet mogelijk.
-          </AlertDescription>
-        </Alert>
-
         <div className="space-y-8">
           <div>
             <h1 className="text-3xl font-bold">Buurthuis Beheren</h1>
