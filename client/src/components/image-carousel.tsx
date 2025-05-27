@@ -8,17 +8,17 @@ interface ImageCarouselProps {
 
 export function ImageCarousel({ images }: ImageCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
-  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
+  const [failedImages, setFailedImages] = useState<string[]>([]);
+  const [loadedImages, setLoadedImages] = useState<string[]>([]);
 
   // Filter out failed images
-  const validImages = images.filter(img => !failedImages.has(img));
+  const validImages = images.filter(img => !failedImages.includes(img));
 
   useEffect(() => {
     // Reset state when images change
     setCurrentIndex(0);
-    setFailedImages(new Set());
-    setLoadedImages(new Set());
+    setFailedImages([]);
+    setLoadedImages([]);
   }, [images]);
 
   const handlePrevious = () => {
@@ -31,7 +31,7 @@ export function ImageCarousel({ images }: ImageCarouselProps) {
 
   const handleImageError = (imageUrl: string) => {
     console.error('Error loading image:', imageUrl);
-    setFailedImages(prev => new Set([...prev, imageUrl]));
+    setFailedImages(prev => [...prev, imageUrl]);
     
     // Probeer de volgende afbeelding te laden als de huidige mislukt
     if (currentIndex < validImages.length - 1) {
@@ -39,10 +39,18 @@ export function ImageCarousel({ images }: ImageCarouselProps) {
     } else if (currentIndex > 0) {
       setCurrentIndex(prev => prev - 1);
     }
+
+    // Log extra informatie voor debugging
+    console.log('Failed image details:', {
+      url: imageUrl,
+      currentIndex,
+      totalImages: validImages.length,
+      failedImages
+    });
   };
 
   const handleImageLoad = (imageUrl: string) => {
-    setLoadedImages(prev => new Set([...prev, imageUrl]));
+    setLoadedImages(prev => [...prev, imageUrl]);
   };
 
   if (validImages.length === 0) {
@@ -56,14 +64,12 @@ export function ImageCarousel({ images }: ImageCarouselProps) {
   return (
     <div className="relative h-full w-full">
       <img
-        src={validImages[currentIndex]}
+        src={`/api/proxy-image?url=${encodeURIComponent(validImages[currentIndex])}`}
         alt={`Afbeelding ${currentIndex + 1}`}
         className="h-full w-full object-cover"
         onError={() => handleImageError(validImages[currentIndex])}
         onLoad={() => handleImageLoad(validImages[currentIndex])}
         loading="eager"
-        crossOrigin="anonymous"
-        referrerPolicy="no-referrer"
       />
       
       {validImages.length > 1 && (

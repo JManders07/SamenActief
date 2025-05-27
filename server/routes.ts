@@ -142,6 +142,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         overwrite: false,
         format: 'png',
         quality: 'auto',
+        transformation: [
+          { fetch_format: 'auto' },
+          { quality: 'auto' }
+        ]
       }, (error, result) => {
         if (error) {
           console.error('Cloudinary upload error:', error);
@@ -1034,6 +1038,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error getting registration count:', error);
       res.status(500).json({ message: "Er is een fout opgetreden" });
+    }
+  });
+
+  // Proxy endpoint voor afbeeldingen
+  app.get("/api/proxy-image", async (req, res) => {
+    try {
+      const imageUrl = req.query.url as string;
+      if (!imageUrl) {
+        return res.status(400).json({ message: "Geen URL opgegeven" });
+      }
+
+      const response = await axios.get(imageUrl, {
+        responseType: 'stream',
+        headers: {
+          'Accept': 'image/*',
+          'User-Agent': 'Mozilla/5.0'
+        }
+      });
+
+      // Stel de juiste headers in
+      res.setHeader('Content-Type', response.headers['content-type']);
+      res.setHeader('Cache-Control', 'public, max-age=31536000');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+
+      // Stream de afbeelding naar de client
+      response.data.pipe(res);
+    } catch (error) {
+      console.error('Error proxying image:', error);
+      res.status(500).json({ message: "Er is een fout opgetreden bij het laden van de afbeelding" });
     }
   });
 
