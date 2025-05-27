@@ -10,9 +10,6 @@ import { mkdir } from "fs/promises";
 import express from "express";
 import axios from "axios";
 import { randomBytes } from "crypto";
-import { v2 as cloudinary } from 'cloudinary';
-import { cloudinaryConfig } from './config';
-import fs from 'fs';
 
 // Middleware om te controleren of een gebruiker een center admin is
 function isCenterAdmin(req: Request, res: Response, next: NextFunction) {
@@ -48,9 +45,6 @@ const storageMulter = multer.diskStorage({
 });
 
 const upload = multer({ storage: storageMulter });
-
-// Configureer Cloudinary
-cloudinary.config(cloudinaryConfig);
 
 // Functie om iemand van de wachtlijst naar de activiteit te verplaatsen
 async function moveFromWaitlistToActivity(userId: number, activityId: number) {
@@ -110,25 +104,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/uploads', express.static(path.join(process.cwd(), 'public', 'uploads')));
 
   // File upload endpoint - moet voor andere routes komen
-  app.post("/api/upload", upload.single('file'), async (req, res) => {
+  app.post("/api/upload", upload.single('file'), (req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: "Geen bestand geüpload" });
     }
-
-    try {
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: 'samenactief',
-        resource_type: 'auto'
-      });
-
-      // Verwijder het tijdelijke bestand
-      fs.unlinkSync(req.file.path);
-
-      res.json({ url: result.secure_url });
-    } catch (error) {
-      console.error('Upload error:', error);
-      res.status(500).json({ message: "Fout bij het uploaden naar Cloudinary" });
-    }
+    console.log('File uploaded:', req.file);
+    const fileUrl = `/uploads/${req.file.filename}`;
+    res.json({ url: fileUrl });
   });
 
   // Nieuwe route om het buurthuis van een admin op te halen

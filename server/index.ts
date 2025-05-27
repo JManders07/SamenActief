@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupAuth } from "./auth";
-import { setupVite, serveStatic } from "./vite";
+import { setupVite, serveStatic, log } from "./vite";
 import { initializeEmailService } from "./email";
 import path from "path";
 import rateLimit from "express-rate-limit";
@@ -50,6 +50,7 @@ if (!process.env.SENDGRID_API_KEY) {
   console.warn("Warning: SENDGRID_API_KEY not set. Email notifications will be disabled.");
 } else {
   initializeEmailService(process.env.SENDGRID_API_KEY, "w.kastelijn@student.fontys.nl");
+  log("Email service initialized");
 }
 
 // Logging middleware
@@ -74,6 +75,7 @@ app.use((req, res, next) => {
       if (logLine.length > 80) {
         logLine = logLine.slice(0, 79) + "…";
       }
+      log(logLine);
     }
   });
 
@@ -94,13 +96,17 @@ app.use("/api/data-retention", dataRetentionRouter);
 
 // Admin routes
 app.use("/api/admin", adminRouter);
+log("Admin routes registered");
 
 // Start server
 (async () => {
   try {
+    log("Starting server setup...");
     setupAuth(app);
+    log("Authentication setup complete");
 
     const server = await registerRoutes(app);
+    log("Routes registered successfully");
 
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       console.error("Server error:", err);
@@ -111,13 +117,15 @@ app.use("/api/admin", adminRouter);
 
     if (process.env.NODE_ENV === "development") {
       await setupVite(app, server);
+      log("Vite setup complete");
     } else {
       serveStatic(app); // 👈 zorgt voor client side routing (SPA)
+      log("Static serving setup complete");
     }
 
     const port = process.env.PORT || 5000;
     server.listen(Number(port), () => {
-      console.log(`Server started on port ${port}`);
+      log(`Server started on port ${port}`);
     });
   } catch (error) {
     console.error("Failed to start server:", error);
