@@ -9,7 +9,21 @@ import { type Server } from "http";
 import viteConfig from "../vite.config";
 import { nanoid } from "nanoid";
 
-const viteLogger = vite.createLogger();
+// Eenvoudige logger implementatie
+const viteLogger: vite.Logger = {
+  info: (msg: string) => console.log(`[Vite] ${msg}`),
+  warn: (msg: string) => console.warn(`[Vite] ${msg}`),
+  error: (msg: string) => console.error(`[Vite] ${msg}`),
+  clearScreen: () => {},
+  hasWarned: false,
+  warnOnce: (msg: string) => {
+    if (!viteLogger.hasWarned) {
+      console.warn(`[Vite] ${msg}`);
+      viteLogger.hasWarned = true;
+    }
+  },
+  hasErrorLogged: (error: Error) => false
+};
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
