@@ -8,6 +8,7 @@ import type { Activity, User, ActivityImage } from "@shared/schema";
 import { Calendar, Users, Package, Building2 } from "lucide-react";
 import { format } from "date-fns";
 import { ImageCarousel } from "@/components/image-carousel";
+import { nl } from "date-fns/locale";
 
 type WaitlistUser = User & { position: number };
 
@@ -186,7 +187,7 @@ export default function ActivityPage() {
             <div className="flex items-center space-x-2 text-xl">
               <Calendar className="h-6 w-6" />
               <time dateTime={date.toISOString()}>
-                {format(date, "EEEE, MMMM d 'om' HH:mm 'uur'")}
+                {format(date, "EEEE, MMMM d 'om' HH:mm 'uur'", { locale: nl })}
               </time>
             </div>
             <div className="flex items-center space-x-2 text-xl">
