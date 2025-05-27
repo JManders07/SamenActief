@@ -58,7 +58,7 @@ export function ActivityCard({
   // Combineer hoofdfoto met extra afbeeldingen
   const allImages = [
     activity.imageUrl,
-    ...(activityImages?.map((img: ActivityImage) => img.imageUrl) || [])
+    ...(activityImages?.filter(img => img.imageUrl !== activity.imageUrl).map((img: ActivityImage) => img.imageUrl) || [])
   ].filter(Boolean);
 
   console.log('Activity card images:', activityImages); // Debug logging

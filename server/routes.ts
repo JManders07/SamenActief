@@ -118,22 +118,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).json({ message: "Geen bestand geüpload" });
     }
 
+    // Controleer Cloudinary configuratie
+    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+      console.error('Cloudinary configuratie ontbreekt');
+      return res.status(500).json({ message: 'Cloudinary configuratie ontbreekt' });
+    }
+
     try {
-      // Upload naar Cloudinary
+      console.log('Start upload naar Cloudinary...');
+      
+      // Upload naar Cloudinary met extra opties
       const stream = cloudinary.v2.uploader.upload_stream({
         folder: 'samenactief',
         resource_type: 'image',
+        use_filename: true,
+        unique_filename: true,
+        overwrite: false,
+        timestamp: Math.floor(Date.now() / 1000), // Gebruik huidige timestamp
       }, (error, result) => {
-        if (error || !result) {
+        if (error) {
           console.error('Cloudinary upload error:', error);
-          return res.status(500).json({ message: 'Upload naar Cloudinary mislukt' });
+          return res.status(500).json({ 
+            message: 'Upload naar Cloudinary mislukt',
+            error: error.message 
+          });
         }
+        
+        if (!result) {
+          console.error('Geen resultaat van Cloudinary upload');
+          return res.status(500).json({ message: 'Upload naar Cloudinary mislukt - geen resultaat' });
+        }
+
+        console.log('Upload succesvol:', result.secure_url);
         res.json({ url: result.secure_url });
       });
+
+      // Log de buffer grootte
+      console.log('Buffer grootte:', req.file.buffer.length);
+      
+      // Pipe de buffer naar Cloudinary
       Readable.from(req.file.buffer).pipe(stream);
     } catch (error) {
       console.error('Cloudinary upload error:', error);
-      res.status(500).json({ message: 'Upload naar Cloudinary mislukt' });
+      res.status(500).json({ 
+        message: 'Upload naar Cloudinary mislukt',
+        error: error instanceof Error ? error.message : 'Onbekende fout'
+      });
     }
   });
 

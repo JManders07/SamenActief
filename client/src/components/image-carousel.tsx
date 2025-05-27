@@ -8,6 +8,7 @@ interface ImageCarouselProps {
 
 export function ImageCarousel({ images }: ImageCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
 
   const next = () => {
     setCurrentIndex((current) => (current + 1) % images.length);
@@ -17,20 +18,36 @@ export function ImageCarousel({ images }: ImageCarouselProps) {
     setCurrentIndex((current) => (current - 1 + images.length) % images.length);
   };
 
+  // Filter out failed images
+  const validImages = images.filter(img => !failedImages.has(img));
+
   console.log('ImageCarousel images:', images); // Debug logging
+  console.log('Failed images:', Array.from(failedImages)); // Debug logging
+
+  if (validImages.length === 0) {
+    return (
+      <div className="relative h-full w-full bg-muted flex items-center justify-center">
+        <p className="text-muted-foreground">Geen afbeeldingen beschikbaar</p>
+      </div>
+    );
+  }
 
   return (
     <div className="relative h-full w-full">
       <img
-        src={images[currentIndex]}
+        src={validImages[currentIndex]}
         alt={`Slide ${currentIndex + 1}`}
         className="h-full w-full object-cover"
         onError={(e) => {
-          console.error('Error loading image:', images[currentIndex]); // Debug logging
-          e.currentTarget.src = "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
+          console.error('Error loading image:', validImages[currentIndex]); // Debug logging
+          setFailedImages(prev => new Set([...prev, validImages[currentIndex]]));
+          // Probeer de volgende afbeelding te laden
+          if (validImages.length > 1) {
+            next();
+          }
         }}
       />
-      {images.length > 1 && (
+      {validImages.length > 1 && (
         <>
           <Button
             variant="ghost"
@@ -49,7 +66,7 @@ export function ImageCarousel({ images }: ImageCarouselProps) {
             <ChevronRight className="h-6 w-6" />
           </Button>
           <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1">
-            {images.map((_, index) => (
+            {validImages.map((_, index) => (
               <button
                 key={index}
                 className={`h-2 w-2 rounded-full ${
