@@ -96,21 +96,63 @@ export default function ActivitiesPage() {
     },
   });
 
+  const handleEditClick = (activity: Activity) => {
+    setEditingActivity(activity);
+    setSelectedImages([]);
+  };
+
   const handleSubmitActivity = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
     if (editingActivity) {
-      // Update bestaande activiteit
-      const dateStr = formData.get("date") as string;
-      updateActivity.mutate({
-        name: formData.get("name") as string,
-        description: formData.get("description") as string,
-        date: new Date(dateStr),
-        capacity: parseInt(formData.get("capacity") as string),
-        materialsNeeded: formData.get("materialsNeeded") as string,
-        facilitiesAvailable: formData.get("facilitiesAvailable") as string,
-      });
+      try {
+        // Upload nieuwe afbeeldingen als er zijn geselecteerd
+        let imageUrls: string[] = [];
+        if (selectedImages.length > 0) {
+          imageUrls = await Promise.all(selectedImages.map(async (file) => {
+            const imageFormData = new FormData();
+            imageFormData.append('file', file);
+
+            const response = await fetch('/api/upload', {
+              method: 'POST',
+              body: imageFormData
+            });
+
+            if (!response.ok) throw new Error('Kon afbeelding niet uploaden');
+            const data = await response.json();
+            return data.url;
+          }));
+        }
+
+        // Update bestaande activiteit
+        const updateData = {
+          name: formData.get("name") as string,
+          description: formData.get("description") as string,
+          date: new Date(formData.get("date") as string),
+          capacity: parseInt(formData.get("capacity") as string),
+          materialsNeeded: formData.get("materialsNeeded") as string,
+          facilitiesAvailable: formData.get("facilitiesAvailable") as string,
+          // Alleen afbeeldingen updaten als er nieuwe zijn geüpload
+          ...(imageUrls.length > 0 && {
+            imageUrl: imageUrls[0],
+            images: imageUrls.map((url, index) => ({
+              imageUrl: url,
+              order: index
+            }))
+          })
+        };
+
+        updateActivity.mutate(updateData);
+      } catch (error) {
+        if (error instanceof Error) {
+          toast({ 
+            title: "Fout",
+            description: error.message,
+            variant: "destructive"
+          });
+        }
+      }
     } else {
       // Maak nieuwe activiteit aan
       if (!center?.id) return;
@@ -165,52 +207,6 @@ export default function ActivitiesPage() {
         setSelectedImages([]);
       } catch (error) {
         if (error instanceof Error && error.message) {
-          toast({ 
-            title: "Fout",
-            description: error.message,
-            variant: "destructive"
-          });
-        }
-      }
-    }
-  };
-
-  const handleEditClick = async (activity: Activity, selectedImages?: File[]) => {
-    setEditingActivity(activity);
-    setSelectedImages([]);
-
-    // Als er nieuwe afbeeldingen zijn geselecteerd, upload deze eerst
-    if (selectedImages && selectedImages.length > 0) {
-      try {
-        const imageUrls = await Promise.all(selectedImages.map(async (file) => {
-          const imageFormData = new FormData();
-          imageFormData.append('file', file);
-
-          const response = await fetch('/api/upload', {
-            method: 'POST',
-            body: imageFormData
-          });
-
-          if (!response.ok) throw new Error('Kon afbeelding niet uploaden');
-          const data = await response.json();
-          return data.url;
-        }));
-
-        // Update de activiteit met de nieuwe afbeeldingen
-        const updateData = {
-          ...activity,
-          imageUrl: imageUrls[0] || activity.imageUrl,
-          images: imageUrls.map((url, index) => ({
-            imageUrl: url,
-            order: index
-          }))
-        };
-
-        updateActivity.mutate(updateData);
-        setEditingActivity(null);
-        setSelectedImages([]);
-      } catch (error) {
-        if (error instanceof Error) {
           toast({ 
             title: "Fout",
             description: error.message,
@@ -304,17 +300,15 @@ export default function ActivitiesPage() {
                     />
                   </div>
 
-                  {!editingActivity && (
-                    <div>
-                      <label className="text-sm font-medium">Foto's</label>
-                      <ImageUpload
-                        onImagesSelected={(files) => setSelectedImages(files)}
-                        onRemoveImage={(index) => {
-                          setSelectedImages(prev => prev.filter((_, i) => i !== index));
-                        }}
-                      />
-                    </div>
-                  )}
+                  <div>
+                    <label className="text-sm font-medium">Foto's</label>
+                    <ImageUpload
+                      onImagesSelected={(files) => setSelectedImages(files)}
+                      onRemoveImage={(index) => {
+                        setSelectedImages(prev => prev.filter((_, i) => i !== index));
+                      }}
+                    />
+                  </div>
 
                   <div className="flex gap-4">
                     <Button type="submit" className="flex-1">
@@ -344,7 +338,7 @@ export default function ActivitiesPage() {
                   <ActivityCard
                     key={activity.id}
                     activity={activity}
-                    onEditClick={(activity, selectedImages) => handleEditClick(activity, selectedImages)}
+                    onEditClick={(activity) => handleEditClick(activity)}
                     onDelete={() => {
                       if (window.confirm("Weet u zeker dat u deze activiteit wilt verwijderen?")) {
                         deleteActivity.mutate(activity.id);
