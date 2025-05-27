@@ -19,6 +19,20 @@ export default function CenterPage() {
     enabled: !!centerId && centerId > 0,
   });
 
+  // Filter alleen toekomstige activiteiten
+  const upcomingActivities = activities?.filter(activity => {
+    const activityDate = new Date(activity.date);
+    const now = new Date();
+    
+    // Als de activiteit vandaag is, controleer dan de tijd
+    if (activityDate.toDateString() === now.toDateString()) {
+      return activityDate > now;
+    }
+    
+    // Anders vergelijk alleen de datum
+    return activityDate > now;
+  }) || [];
+
   if (isLoadingCenter || isLoadingActivities) {
     return (
       <div className="space-y-8">
@@ -53,9 +67,9 @@ export default function CenterPage() {
 
       <div className="space-y-4">
         <h2 className="text-3xl font-bold">Aankomende Activiteiten</h2>
-        {activities && activities.length > 0 ? (
+        {upcomingActivities && upcomingActivities.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2">
-            {activities.map((activity) => (
+            {upcomingActivities.map((activity) => (
               <ActivityCard key={activity.id} activity={activity} />
             ))}
           </div>
