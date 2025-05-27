@@ -2,7 +2,7 @@ import express, { type Express } from "express";
 import fs from "fs";
 import path, { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
-import { createServer as createViteServer } from "vite";
+import { createServer } from "vite";
 import type { ViteDevServer } from "vite";
 import { type Server } from "http";
 import viteConfig from "../vite.config";
@@ -14,7 +14,7 @@ const __dirname = dirname(__filename);
 export async function createDevServer() {
   const app = express();
   
-  const vite = await createViteServer({
+  const vite = await createServer({
     server: { middlewareMode: true },
     appType: 'custom',
     root: resolve(__dirname, '../client'),
@@ -26,7 +26,7 @@ export async function createDevServer() {
 }
 
 export async function setupVite(app: Express, server: Server) {
-  const vite = await createViteServer({
+  const vite = await createServer({
     server: { middlewareMode: true },
     appType: 'custom',
     root: resolve(__dirname, '../client'),
