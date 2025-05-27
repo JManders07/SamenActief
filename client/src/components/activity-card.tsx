@@ -46,9 +46,10 @@ export function ActivityCard({
   const isFull = availableSpots <= 0;
 
   // Haal extra afbeeldingen op
-  const { data: activityImages } = useQuery<ActivityImage[]>({
+  const { data: activityImages, isLoading: isLoadingImages } = useQuery<ActivityImage[]>({
     queryKey: [`/api/activities/${activity.id}/images`],
     enabled: !!activity.id,
+    staleTime: 0, // Altijd verse data ophalen
   });
 
   // Combineer hoofdfoto met extra afbeeldingen
@@ -56,6 +57,14 @@ export function ActivityCard({
     activity.imageUrl,
     ...(activityImages?.map(img => img.imageUrl) || [])
   ].filter(Boolean);
+
+  if (isLoadingImages) {
+    return (
+      <Card className="overflow-hidden">
+        <div className="relative h-48 overflow-hidden rounded-t-lg bg-muted animate-pulse" />
+      </Card>
+    );
+  }
 
   return (
     <Card className="overflow-hidden">

@@ -12,29 +12,14 @@ export function ImageUpload({ onImagesSelected, onRemoveImage, preview = [] }: I
   const [previewUrls, setPreviewUrls] = useState<string[]>(preview);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    // Upload files to Cloudinary
-    const uploadedUrls = await Promise.all(
-      files.map(async (file) => {
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData
-        });
-
-        if (!response.ok) throw new Error('Kon afbeelding niet uploaden');
-        const data = await response.json();
-        return data.url;
-      })
-    );
-
-    // Update preview URLs with Cloudinary URLs
-    setPreviewUrls(prev => [...prev, ...uploadedUrls]);
+    // Create preview URLs
+    const newPreviewUrls = files.map(file => URL.createObjectURL(file));
+    setPreviewUrls(prev => [...prev, ...newPreviewUrls]);
+    
     onImagesSelected(files);
   };
 

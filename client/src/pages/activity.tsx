@@ -26,6 +26,7 @@ export default function ActivityPage() {
   const { data: activityImages, isLoading: isLoadingImages } = useQuery<ActivityImage[]>({
     queryKey: [`/api/activities/${id}/images`],
     enabled: !!id,
+    staleTime: 0,
   });
 
   const { data: attendees, isLoading: isLoadingAttendees } = useQuery<User[]>({
@@ -157,6 +158,9 @@ export default function ActivityPage() {
     activity.imageUrl,
     ...(activityImages?.map(img => img.imageUrl) || [])
   ].filter(Boolean);
+
+  console.log('Activity images:', activityImages); // Debug logging
+  console.log('All images:', allImages); // Debug logging
 
   return (
     <div className="space-y-8">

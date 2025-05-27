@@ -159,6 +159,7 @@ export default function ActivitiesPage() {
         }
 
         queryClient.invalidateQueries({ queryKey: [`/api/activities`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/activities/${responseData.id}/images`] });
         toast({ title: "Activiteit aangemaakt" });
         (e.target as HTMLFormElement).reset();
         setSelectedImages([]);
