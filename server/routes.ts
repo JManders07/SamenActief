@@ -965,7 +965,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
+      // Voeg cache-control headers toe
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      res.setHeader('Surrogate-Control', 'no-store');
+
       const images = await storage.getActivityImages(activityId);
+      console.log('Fetched images for activity', activityId, ':', images); // Debug logging
       res.json(images);
     } catch (error) {
       console.error('Error fetching activity images:', error);

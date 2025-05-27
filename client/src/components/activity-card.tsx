@@ -49,14 +49,20 @@ export function ActivityCard({
   const { data: activityImages, isLoading: isLoadingImages } = useQuery<ActivityImage[]>({
     queryKey: [`/api/activities/${activity.id}/images`],
     enabled: !!activity.id,
-    staleTime: 0, // Altijd verse data ophalen
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   // Combineer hoofdfoto met extra afbeeldingen
   const allImages = [
     activity.imageUrl,
-    ...(activityImages?.map(img => img.imageUrl) || [])
+    ...(activityImages?.map((img: ActivityImage) => img.imageUrl) || [])
   ].filter(Boolean);
+
+  console.log('Activity card images:', activityImages); // Debug logging
+  console.log('Activity card all images:', allImages); // Debug logging
 
   if (isLoadingImages) {
     return (
