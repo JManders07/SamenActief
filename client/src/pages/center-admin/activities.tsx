@@ -175,6 +175,52 @@ export default function ActivitiesPage() {
     }
   };
 
+  const handleEditClick = async (activity: Activity, selectedImages?: File[]) => {
+    setEditingActivity(activity);
+    setSelectedImages([]);
+
+    // Als er nieuwe afbeeldingen zijn geselecteerd, upload deze eerst
+    if (selectedImages && selectedImages.length > 0) {
+      try {
+        const imageUrls = await Promise.all(selectedImages.map(async (file) => {
+          const imageFormData = new FormData();
+          imageFormData.append('file', file);
+
+          const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: imageFormData
+          });
+
+          if (!response.ok) throw new Error('Kon afbeelding niet uploaden');
+          const data = await response.json();
+          return data.url;
+        }));
+
+        // Update de activiteit met de nieuwe afbeeldingen
+        const updateData = {
+          ...activity,
+          imageUrl: imageUrls[0] || activity.imageUrl,
+          images: imageUrls.map((url, index) => ({
+            imageUrl: url,
+            order: index
+          }))
+        };
+
+        updateActivity.mutate(updateData);
+        setEditingActivity(null);
+        setSelectedImages([]);
+      } catch (error) {
+        if (error instanceof Error) {
+          toast({ 
+            title: "Fout",
+            description: error.message,
+            variant: "destructive"
+          });
+        }
+      }
+    }
+  };
+
   return (
     <CenterAdminLayout>
       <div className="container mx-auto py-8">
@@ -298,7 +344,7 @@ export default function ActivitiesPage() {
                   <ActivityCard
                     key={activity.id}
                     activity={activity}
-                    onEditClick={() => setEditingActivity(activity)}
+                    onEditClick={(activity, selectedImages) => handleEditClick(activity, selectedImages)}
                     onDelete={() => {
                       if (window.confirm("Weet u zeker dat u deze activiteit wilt verwijderen?")) {
                         deleteActivity.mutate(activity.id);

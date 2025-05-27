@@ -4,17 +4,19 @@ import { Link } from "wouter";
 import { formatDistanceToNow, format } from "date-fns";
 import { nl } from "date-fns/locale";
 import type { Activity, ActivityImage } from "@shared/schema";
-import { Calendar, Users, Car, Package, Building2 } from "lucide-react";
+import { Calendar, Users, Car, Package, Building2, Image as ImageIcon } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { ImageCarousel } from "@/components/image-carousel";
+import { ImageUpload } from "@/components/image-upload";
+import { useState } from "react";
 
 interface ActivityCardProps {
   activity: Activity;
   onRegister?: () => void;
   isRegistered?: boolean;
-  onEditClick?: (activity: Activity) => void;
+  onEditClick?: (activity: Activity, selectedImages?: File[]) => void;
   onDelete?: () => void;
   waitlistPosition?: number;
   onWaitlist?: boolean;
@@ -35,6 +37,7 @@ export function ActivityCard({
   const [, setLocation] = useLocation();
   const date = new Date(activity.date);
   const isAdmin = user && user.role === "center_admin";
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
 
   // Haal aantal aanmeldingen op
   const { data: attendees } = useQuery<number>({
@@ -55,9 +58,6 @@ export function ActivityCard({
     refetchOnWindowFocus: true,
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    onError: (error) => {
-      console.error('Error fetching activity images:', error);
-    }
   });
 
   // Combineer hoofdfoto met extra afbeeldingen
@@ -99,17 +99,27 @@ export function ActivityCard({
         {isAdmin && (onEditClick || onDelete) && (
           <div className="absolute top-2 right-2 flex gap-2">
             {onEditClick && (
-              <Button
-                size="sm"
-                variant="secondary"
-                className="bg-white/90 hover:bg-white text-black"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEditClick(activity);
-                }}
-              >
-                Bewerken
-              </Button>
+              <>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="bg-white/90 hover:bg-white text-black"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEditClick(activity, selectedImages);
+                  }}
+                >
+                  Bewerken
+                </Button>
+                <div className="mt-2">
+                  <ImageUpload
+                    onImagesSelected={(files) => setSelectedImages(files)}
+                    onRemoveImage={(index) => {
+                      setSelectedImages(prev => prev.filter((_, i) => i !== index));
+                    }}
+                  />
+                </div>
+              </>
             )}
             {onDelete && (
               <Button
