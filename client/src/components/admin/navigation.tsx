@@ -67,24 +67,24 @@ const navigation = [
 ];
 
 export function AdminNavigation() {
-  const [location, setLocation] = useLocation();
+  const [location] = useLocation();
 
   return (
     <nav className="space-y-1">
       {navigation.map((item) => {
         const isActive = location === item.href;
         return (
-          <button
+          <a
             key={item.name}
-            onClick={() => setLocation(item.href)}
+            href={item.href}
             className={cn(
-              "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
               isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
             )}
           >
             <item.icon className="h-4 w-4" />
             {item.name}
-          </button>
+          </a>
         );
       })}
     </nav>
