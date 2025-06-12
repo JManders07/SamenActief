@@ -1,3 +1,6 @@
+-- Verwijder de oude blogs tabel als deze bestaat
+DROP TABLE IF EXISTS blogs;
+
 -- Blog tabel
 CREATE TABLE IF NOT EXISTS blogs (
   id SERIAL PRIMARY KEY,

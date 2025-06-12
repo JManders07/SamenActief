@@ -1,6 +1,7 @@
 import { pgTable, text, serial, integer, boolean, timestamp, pgEnum } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
 export const roleEnum = pgEnum('role', ['user', 'center_admin', 'admin']);
 
@@ -151,6 +152,29 @@ export const dataRetentionLogs = pgTable("data_retention_logs", {
   executionTime: timestamp("execution_time").notNull(),
 });
 
+export const blogs = pgTable("blogs", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  imageUrl: text("image_url"),
+  authorId: integer("author_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  published: boolean("published").notNull().default(true),
+});
+
+// Definieer de relaties
+export const blogsRelations = relations(blogs, ({ one }) => ({
+  author: one(users, {
+    fields: [blogs.authorId],
+    references: [users.id],
+  }),
+}));
+
+export const usersRelations = relations(users, ({ many }) => ({
+  blogs: many(blogs),
+}));
+
 // Insert schemas
 export const insertReminderSchema = createInsertSchema(reminders);
 export const insertWaitlistSchema = createInsertSchema(waitlist);
@@ -220,3 +244,10 @@ export type InsertDataBreach = typeof dataBreaches.$inferInsert;
 export type InsertAffectedUser = typeof affectedUsers.$inferInsert;
 export type InsertDataRetentionRule = typeof dataRetentionRules.$inferInsert;
 export type InsertDataRetentionLog = typeof dataRetentionLogs.$inferInsert;
+
+// Add blog types
+export type Blog = typeof blogs.$inferSelect;
+export type InsertBlog = typeof blogs.$inferInsert;
+
+// Add blog insert schema
+export const insertBlogSchema = createInsertSchema(blogs);
