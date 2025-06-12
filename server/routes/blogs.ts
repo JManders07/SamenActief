@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "../db";
-import { blogs, users } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { blogs, users, blogComments } from "@shared/schema";
+import { eq, desc } from "drizzle-orm";
 
 const router = Router();
 
@@ -72,6 +72,73 @@ router.get("/:id", async (req, res) => {
     res.json(formattedBlog);
   } catch (error) {
     console.error("Error fetching blog:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Haal comments voor een blog op
+router.get("/:id/comments", async (req, res) => {
+  try {
+    const comments = await db.query.blogComments.findMany({
+      where: eq(blogComments.blogId, parseInt(req.params.id)),
+      with: {
+        user: {
+          columns: {
+            displayName: true,
+          },
+        },
+      },
+      orderBy: desc(blogComments.createdAt),
+    });
+
+    const formatted = comments.map((c) => ({
+      id: c.id,
+      content: c.content,
+      created_at: c.createdAt,
+      user: {
+        display_name: c.user.displayName,
+      },
+    }));
+
+    res.json(formatted);
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Voeg een comment toe (auth vereist)
+router.post("/:id/comments", async (req, res) => {
+  try {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "Niet geautoriseerd" });
+    }
+
+    const user = req.user;
+    const { content } = req.body;
+    if (!content || content.trim().length === 0) {
+      return res.status(400).json({ error: "Content mag niet leeg zijn" });
+    }
+
+    const [inserted] = await db
+      .insert(blogComments)
+      .values({
+        blogId: parseInt(req.params.id),
+        userId: user.id,
+        content,
+      })
+      .returning();
+
+    res.status(201).json({
+      id: inserted.id,
+      content: inserted.content,
+      created_at: inserted.createdAt,
+      user: {
+        display_name: user.displayName,
+      },
+    });
+  } catch (error) {
+    console.error("Error adding comment:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });

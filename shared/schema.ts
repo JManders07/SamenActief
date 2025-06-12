@@ -163,6 +163,14 @@ export const blogs = pgTable("blogs", {
   published: boolean("published").notNull().default(true),
 });
 
+export const blogComments = pgTable("blog_comments", {
+  id: serial("id").primaryKey(),
+  blogId: integer("blog_id").notNull().references(() => blogs.id, { onDelete: 'cascade' }),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 // Definieer de relaties
 export const blogsRelations = relations(blogs, ({ one }) => ({
   author: one(users, {
@@ -173,6 +181,17 @@ export const blogsRelations = relations(blogs, ({ one }) => ({
 
 export const usersRelations = relations(users, ({ many }) => ({
   blogs: many(blogs),
+}));
+
+export const blogCommentsRelations = relations(blogComments, ({ one }) => ({
+  blog: one(blogs, {
+    fields: [blogComments.blogId],
+    references: [blogs.id],
+  }),
+  user: one(users, {
+    fields: [blogComments.userId],
+    references: [users.id],
+  }),
 }));
 
 // Insert schemas
@@ -251,3 +270,12 @@ export type InsertBlog = typeof blogs.$inferInsert;
 
 // Add blog insert schema
 export const insertBlogSchema = createInsertSchema(blogs);
+
+// Types
+export type BlogComment = typeof blogComments.$inferSelect;
+export type InsertBlogComment = typeof blogComments.$inferInsert;
+
+export const insertBlogCommentSchema = createInsertSchema(blogComments).pick({
+  blogId: true,
+  content: true,
+});
