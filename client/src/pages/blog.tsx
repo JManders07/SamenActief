@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLocation } from "wouter";
 
 interface Blog {
   id: number;
@@ -24,11 +25,16 @@ async function getBlogs(): Promise<Blog[]> {
 }
 
 function BlogCard({ blog }: { blog: Blog }) {
+  const [, navigate] = useLocation();
+
   return (
-    <Card className="overflow-hidden">
+    <Card 
+      className="overflow-hidden cursor-pointer transition-transform hover:scale-[1.02]"
+      onClick={() => navigate(`/blog/${blog.id}`)}
+    >
       <div className="aspect-video relative">
         <img
-          src={blog.image_url}
+          src={`/api/proxy-image?url=${encodeURIComponent(blog.image_url)}`}
           alt={blog.title}
           className="object-cover w-full h-full"
         />

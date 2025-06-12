@@ -35,6 +35,7 @@ import AdminSecurity from "@/pages/admin/security";
 import AdminLogs from "@/pages/admin/logs";
 import AdminSettings from "@/pages/admin/settings";
 import Blog from "@/pages/blog";
+import BlogDetail from "@/pages/blog/[id]";
 
 function Router() {
   return (
@@ -42,6 +43,7 @@ function Router() {
       <Route path="/" component={Index} />
       <Route path="/home" component={Home} />
       <Route path="/blog" component={Blog} />
+      <Route path="/blog/:id" component={BlogDetail} />
       <Route path="/centers/:id" component={Center} />
       <Route path="/activities/:id" component={Activity} />
       <Route path="/profile" component={Profile} />
