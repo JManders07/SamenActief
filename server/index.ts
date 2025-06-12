@@ -94,11 +94,12 @@ process.on("unhandledRejection", (reason, promise) => {
 // Voeg de nieuwe routes toe
 app.use("/api/data-breach", dataBreachRouter);
 app.use("/api/data-retention", dataRetentionRouter);
-app.use("/api/blogs", blogsRouter);
 
 // Admin routes
 app.use("/api/admin", adminRouter);
 log("Admin routes registered");
+
+// Blog routes (vereisen sessie & passport zodat req.isAuthenticated bestaat)
 
 // Start server
 (async () => {
@@ -106,6 +107,9 @@ log("Admin routes registered");
     log("Starting server setup...");
     setupAuth(app);
     log("Authentication setup complete");
+
+    // Blog routes na authenticatie
+    app.use("/api/blogs", blogsRouter);
 
     const server = await registerRoutes(app);
     log("Routes registered successfully");
