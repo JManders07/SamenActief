@@ -34,12 +34,14 @@ import AdminEmailTemplates from "@/pages/admin/email-templates";
 import AdminSecurity from "@/pages/admin/security";
 import AdminLogs from "@/pages/admin/logs";
 import AdminSettings from "@/pages/admin/settings";
+import Blog from "@/pages/blog";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Index} />
       <Route path="/home" component={Home} />
+      <Route path="/blog" component={Blog} />
       <Route path="/centers/:id" component={Center} />
       <Route path="/activities/:id" component={Activity} />
       <Route path="/profile" component={Profile} />

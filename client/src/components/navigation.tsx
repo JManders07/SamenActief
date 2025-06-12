@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
-import { Building2, User, Eye, Settings, BarChart, HelpCircle, Home, Mail, Info } from "lucide-react";
+import { Building2, User, Eye, Settings, BarChart, HelpCircle, Home, Mail, Info, Newspaper } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
 import { Button } from "./ui/button";
@@ -18,6 +18,7 @@ export default function Navigation() {
 
   const links = [
     { href: "/", label: "Startpagina", icon: Home },
+    { href: "/blog", label: "Blog", icon: Newspaper },
     // Only show application link for logged in users
     ...(user ? [{ href: "/home", label: "Activiteitencentra", icon: Building2 }] : []),
     // Only show profile for regular users
