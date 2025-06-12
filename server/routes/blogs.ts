@@ -114,7 +114,7 @@ router.post("/:id/comments", async (req, res) => {
       return res.status(401).json({ error: "Niet geautoriseerd" });
     }
 
-    const user = req.user;
+    const user = req.user as any;
     const { content } = req.body;
     if (!content || content.trim().length === 0) {
       return res.status(400).json({ error: "Content mag niet leeg zijn" });
@@ -123,8 +123,8 @@ router.post("/:id/comments", async (req, res) => {
     const [inserted] = await db
       .insert(blogComments)
       .values({
-        blogId: parseInt(req.params.id),
-        userId: user.id,
+        blogId: Number(req.params.id),
+        userId: Number(user.id),
         content,
       })
       .returning();
