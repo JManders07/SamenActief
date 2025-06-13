@@ -13,10 +13,10 @@ export default function HelpPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="relative h-[400px] bg-gray-900">
+      <div className="relative h-[600px] bg-gray-900">
         <div className="absolute inset-0">
           <img
-            src="/help-hero.jpg"
+            src="../public/Help.jpg"
             alt="Hulp en ondersteuning"
             className="w-full h-full object-cover opacity-50"
           />

@@ -83,16 +83,23 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white py-20">
-        <div className="container mx-auto px-4 text-center">
+      <div className="relative h-[400px] bg-gray-900">
+        <div className="absolute inset-0">
+          <img
+            src="../public/Contact.jpg"
+            alt="Over SamenActief"
+            className="w-full h-full object-cover opacity-50"
+          />
+        </div>
+        <div className="relative container mx-auto px-4 h-full flex flex-col justify-center items-center text-white text-center">
           <h1 className="text-5xl font-bold mb-6">Neem contact met ons op</h1>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            Heb je vragen, suggesties of wil je meer weten over SamenActief? 
-            We staan voor je klaar!
+          <p className="text-xl mb-8 max-w-2xl">
+          Heb je vragen, suggesties of wil je meer weten over SamenActief? 
+          We staan voor je klaar!
           </p>
         </div>
       </div>
+     
 
       {/* Contact Form Section */}
       <div className="container mx-auto px-4 py-16">
