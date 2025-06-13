@@ -16,7 +16,7 @@ export default function HelpPage() {
       <div className="relative h-[600px] bg-gray-900">
         <div className="absolute inset-0">
           <img
-            src="../public/Help.jpg"
+            src="/Help.jpg"
             alt="Hulp en ondersteuning"
             className="w-full h-full object-cover opacity-50"
           />

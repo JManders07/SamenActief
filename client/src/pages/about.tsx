@@ -7,7 +7,7 @@ export default function AboutPage() {
       <div className="relative h-[400px] bg-gray-900">
         <div className="absolute inset-0">
           <img
-            src="../public/OverOns.jpg"
+            src="OverOns.jpg"
             alt="Over SamenActief"
             className="w-full h-full object-cover opacity-50"
           />
