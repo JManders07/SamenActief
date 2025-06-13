@@ -1,3 +1,4 @@
+<meta name="seobility" content="29f0a90b703142600118afbe02ddc6c4"></meta>
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
